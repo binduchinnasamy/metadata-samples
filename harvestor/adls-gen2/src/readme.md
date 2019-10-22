@@ -8,12 +8,19 @@ Scanning ADLS Gen 2 folder strucutre is done using databricks job.
 Access to both ADLS Gen 2 and Blob storage is utilized 
 
 This python notebook needs the following values in the **Spark Cluster's environment variables**
+  
+1. ADLSGen2_Resource_Group='ADLS Gen 2 Resource Group location'
+2. Scan_Depth=3
+3. BlobStorage_Output=[Name of the storage account container where the output should made]
+4. KeyVault_ADLSGen2_Access_Secret_Name=[Secret name in KeyVault]
+5. PYSPARK_PYTHON=/databricks/python3/bin/python3
+6. ADLSGen2_Subscription_Id=[Subscription ID]
+7. KeyVault_BlobStorage_Access_Secret_Name=[Secret name in keyvault]
+8. BlobStorage_URL=[Blob Storage URL - example - accountname.blob.core.windows.net]
+9. KeyVault_Client_Secret_Secret_Name=[Serice Principle Sceret name in KeyVault]
+10. AAD_Client_Id=[AAD Client ID of the service principal]
+11. AAD_Tenant_Id=[Tenant ID]
+12. Azure_KeyVault_Scope=[KeyVault scope that is managed by databricks]
+13. ADLSGen2_URL=[URL of ADS Gen 2 account - example accountname.dfs.core.windows.net]
 
-1. Scan_Depth=<<Scan depth - level to scan - int value>>
-2. BlobStorage_Output=<<Output container name in blob storage>>
-3. KeyVault_ADLSGen2_Access_Secret_Name=<<Secret name in KeyVault>>
-4. KeyVault_BlobStorage_Access_Secret_Name=<<Secret name in Keyvault for blob storage access key>>
-5. BlobStorage_URL=<<URL of the Blob storage [accountname.blob.core.windows.net]>>
-6. Azure_KeyVault_Scope=<<Azure KeyVault scope - This scope needs to be managed by Azure Databrics>>
-7. ADLSGen2_URL=<<URL of ADLS Gen 2 [accountname.dfs.core.windows.net]>>
-8. ADLSGen2_FileSystem=<<Name of the file system to be scanned in ADLS Gen 2>>
+
