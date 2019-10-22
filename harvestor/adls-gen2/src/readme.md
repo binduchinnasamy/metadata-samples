@@ -23,4 +23,11 @@ This python notebook needs the following values in the **Spark Cluster's environ
 12. Azure_KeyVault_Scope=[KeyVault scope that is managed by databricks]
 13. ADLSGen2_URL=[URL of ADS Gen 2 account - example accountname.dfs.core.windows.net]
 
+#### PyPi libraries 
 
+The following Python libraries needs to be installed in the cluster
+
+1. azure-common
+2. azure-mgmt-resource
+3. azure-mgmt-storage
+4. azure-storage-blob
