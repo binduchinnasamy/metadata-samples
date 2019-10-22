@@ -9,7 +9,7 @@ Access to both ADLS Gen 2 and Blob storage is utilized
 
 This python notebook needs the following values in the **Spark Cluster's environment variables**
   
-1. ADLSGen2_Resource_Group='ADLS Gen 2 Resource Group location'
+1. ADLSGen2_Resource_Group=[ADLS Gen 2 Resource Group name]
 2. Scan_Depth=3
 3. BlobStorage_Output=[Name of the storage account container where the output should made]
 4. KeyVault_ADLSGen2_Access_Secret_Name=[Secret name in KeyVault]
