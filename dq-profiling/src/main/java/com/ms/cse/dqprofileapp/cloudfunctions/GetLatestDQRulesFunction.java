@@ -19,7 +19,7 @@ public class GetLatestDQRulesFunction {
     @Bean
     public Function<Timestamp, List<RulesInfo>> getLatestDQRules() {
         return waterMarkDate -> {
-            List<RulesInfo> rulesInfo = rulesInfoRepository.findByUpdatedBetweenOrderByUpdatedDesc(waterMarkDate, TimestampExtension.now());
+            List<RulesInfo> rulesInfo = rulesInfoRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(waterMarkDate, TimestampExtension.now());
             return rulesInfo;
         };
     }

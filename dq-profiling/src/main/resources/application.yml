@@ -4,11 +4,16 @@ dqProfileApp:
     username: ""
     password: ""
 spring:
+  jmx:
+    default-domain: com.ms.cse
+    unique-names: true
   application:
     name: "DQ Profiler App"
   main:
     web-application-type: none
   datasource:
     jdbcUrl: "${dqProfileApp.mssql.url}"
+    url: "${dqProfileApp.mssql.url}"
     username: "${dqProfileApp.mssql.username}"
     password: "${dqProfileApp.mssql.password}"
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver

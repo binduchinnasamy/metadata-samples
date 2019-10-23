@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface RulesInfoRepository extends CrudRepository<RulesInfo, Integer> {
-    List<RulesInfo> findByUpdatedBetweenOrderByUpdatedDesc(Timestamp start, Timestamp stop);
+    List<RulesInfo> findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(Timestamp start, Timestamp stop);
 }

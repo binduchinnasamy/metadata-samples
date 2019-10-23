@@ -20,13 +20,13 @@ public class RulesInfo {
     @Getter @Setter private String dimension;
     @Getter @Setter private String columnName;
 
-    @Column(name = "Rule Description")
+    @Column(name = "\"Rule Description\"")
     @Getter @Setter private String ruleDescription;
 
-    @Column(name = "Business Rule Name")
+    @Column(name = "\"Business Rule Name\"")
     @Getter @Setter private String businessRuleName;
 
-    @Column(name = "Update Timestamp")
+    @Column(name = "\"Update Timestamp\"")
     @Getter @Setter private Timestamp updateTimestamp;
     @Getter @Setter private String ruleType;
 

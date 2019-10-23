@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface EntityScoreRepository extends CrudRepository<EntityScore, Integer> {
-    List<EntityScore> findByUpdatedBetweenOrderByUpdatedDesc(Timestamp start, Timestamp stop);
+    List<EntityScore> findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(Timestamp start, Timestamp stop);
 }

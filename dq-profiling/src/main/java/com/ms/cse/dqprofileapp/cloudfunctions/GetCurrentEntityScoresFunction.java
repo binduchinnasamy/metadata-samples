@@ -19,7 +19,12 @@ public class GetCurrentEntityScoresFunction {
     @Bean
     public Function<Timestamp, List<EntityScore>> getCurrentEntityScores() {
         return waterMarkDate -> {
-            List<EntityScore> entityScores = entityScoreRepository.findByUpdatedBetweenOrderByUpdatedDesc(waterMarkDate, TimestampExtension.now());
+            try {
+                List<EntityScore> entityScores1 = (List) entityScoreRepository.findAll();
+            } catch (Exception e){
+                System.out.println(e);
+            }
+            List<EntityScore> entityScores = entityScoreRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(waterMarkDate, TimestampExtension.now());
             return entityScores;
         };
     }

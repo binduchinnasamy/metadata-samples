@@ -21,7 +21,6 @@ public class DQRulesHandler extends AzureSpringBootRequestHandler<Timestamp, Lis
             ExecutionContext context) {
 
         ScheduleStatus scheduleStatus = ScheduleStatus.Deserialize(timerInfo);
-
         List<RulesInfo> rulesInfos = handleRequest(scheduleStatus.getLast() == null ? TimestampExtension.now() : scheduleStatus.getLast(), context);
         return rulesInfos;
     }

@@ -1,5 +1,6 @@
 package com.ms.cse.dqprofileapp.spring;
 
+import com.zaxxer.hikari.HikariConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -19,7 +20,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 @Component
-@Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
         entityManagerFactoryRef = "sqlEntityManagerFactory",
@@ -34,19 +34,12 @@ public class SqlConfiguration {
         return new DataSourceProperties();
     }
 
-    @Bean(name = "sqlDataSource")
-    @Primary
-    @ConfigurationProperties(prefix = "spring.datasource")
-    public DataSource sqlDataSource() {
-        return DataSourceBuilder.create().build();
-    }
-
     @Bean(name = "sqlEntityManagerFactory")
     @Primary
     public LocalContainerEntityManagerFactoryBean
     sqlEntityManagerFactory(
             EntityManagerFactoryBuilder builder,
-            @Qualifier("sqlDataSource") DataSource dataSource) {
+             DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
                 .packages("com.ms.cse.dqprofileapp.models")
