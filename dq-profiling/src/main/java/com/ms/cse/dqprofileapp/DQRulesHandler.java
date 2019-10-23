@@ -12,7 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
 import java.sql.Timestamp;
 import java.util.List;
 
-//@ComponentScan(basePackages={"com.ms.cse.dqprofileapp"})
+@ComponentScan(basePackages={"com.ms.cse.dqprofileapp"})
 public class DQRulesHandler extends AzureSpringBootRequestHandler<Timestamp, List<RulesInfo>> {
 
     @FunctionName("getLatestDQRules")
@@ -20,9 +20,7 @@ public class DQRulesHandler extends AzureSpringBootRequestHandler<Timestamp, Lis
             @TimerTrigger(name = "getLatestDQRulesTrigger", schedule = "0 */2 * * * *") String timerInfo,
             ExecutionContext context) {
 
-        // Use getLast() from scheduleStatus
         ScheduleStatus scheduleStatus = ScheduleStatus.Deserialize(timerInfo);
-
         List<RulesInfo> rulesInfos = handleRequest(scheduleStatus.getLast() == null ? TimestampExtension.now() : scheduleStatus.getLast(), context);
         return rulesInfos;
     }
