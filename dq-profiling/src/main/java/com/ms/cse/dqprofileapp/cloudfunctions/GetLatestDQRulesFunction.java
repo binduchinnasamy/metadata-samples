@@ -1,5 +1,6 @@
 package com.ms.cse.dqprofileapp.cloudfunctions;
 
+import com.microsoft.azure.functions.ExecutionContext;
 import com.ms.cse.dqprofileapp.extensions.TimestampExtension;
 import com.ms.cse.dqprofileapp.models.RulesInfo;
 import com.ms.cse.dqprofileapp.repositories.RulesInfoRepository;
@@ -17,7 +18,7 @@ public class GetLatestDQRulesFunction {
     private RulesInfoRepository rulesInfoRepository;
 
     @Bean
-    public Function<Timestamp, List<RulesInfo>> getLatestDQRules() {
+    public Function<Timestamp, List<RulesInfo>> getLatestDQRules(ExecutionContext targetContext) {
         return waterMarkDate -> {
             List<RulesInfo> rulesInfo = rulesInfoRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(waterMarkDate, TimestampExtension.now());
             return rulesInfo;
