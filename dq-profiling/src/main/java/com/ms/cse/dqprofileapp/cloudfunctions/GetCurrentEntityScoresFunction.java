@@ -18,7 +18,7 @@ public class GetCurrentEntityScoresFunction {
     private EntityScoreRepository entityScoreRepository;
 
     @Bean
-    public Function<Timestamp, List<EntityScore>> getCurrentEntityScores(ExecutionContext targetContext) {
+    public Function<Timestamp, List<EntityScore>> getCurrentEntityScores() {
         return waterMarkDate -> {
             try {
                 List<EntityScore> entityScores1 = (List) entityScoreRepository.findAll();

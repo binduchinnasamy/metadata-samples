@@ -12,10 +12,10 @@ import org.springframework.context.annotation.ComponentScan;
 import java.sql.Timestamp;
 import java.util.List;
 
-@ComponentScan(basePackages={"com.ms.cse.dqprofileapp"})
+//@ComponentScan(basePackages={"com.ms.cse.dqprofileapp"})
 public class ColumnScoreHandler extends AzureSpringBootRequestHandler<Timestamp, List<ColumnScore>> {
 
-    @FunctionName("getCurrentColumnScores")
+    //@FunctionName("getCurrentColumnScores")
     public List<ColumnScore> execute(
             @TimerTrigger(name = "getCurrentColumnScoresTrigger", schedule = "0 */2 * * * *") String timerInfo,
             ExecutionContext context) {

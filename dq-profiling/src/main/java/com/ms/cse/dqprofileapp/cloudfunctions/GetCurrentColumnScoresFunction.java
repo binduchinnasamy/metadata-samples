@@ -16,7 +16,7 @@ public class GetCurrentColumnScoresFunction {
     private ColumnScoreRepository columnScoreRepository;
 
     @Bean
-    public Function<Timestamp, List<ColumnScore>> getCurrentColumnScores(ExecutionContext targetContext) {
+    public Function<Timestamp, List<ColumnScore>> getCurrentColumnScores() {
         return waterMarkDate -> {
             try {
                 List<ColumnScore> entityScores1 = (List) columnScoreRepository.findAll();
