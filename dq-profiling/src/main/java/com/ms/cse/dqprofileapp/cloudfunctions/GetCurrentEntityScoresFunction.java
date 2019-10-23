@@ -1,5 +1,6 @@
 package com.ms.cse.dqprofileapp.cloudfunctions;
 
+import com.microsoft.azure.functions.ExecutionContext;
 import com.ms.cse.dqprofileapp.extensions.TimestampExtension;
 import com.ms.cse.dqprofileapp.models.EntityScore;
 import com.ms.cse.dqprofileapp.repositories.EntityScoreRepository;
@@ -17,7 +18,7 @@ public class GetCurrentEntityScoresFunction {
     private EntityScoreRepository entityScoreRepository;
 
     @Bean
-    public Function<Timestamp, List<EntityScore>> getCurrentEntityScores() {
+    public Function<Timestamp, List<EntityScore>> getCurrentEntityScores(ExecutionContext targetContext) {
         return waterMarkDate -> {
             try {
                 List<EntityScore> entityScores1 = (List) entityScoreRepository.findAll();
