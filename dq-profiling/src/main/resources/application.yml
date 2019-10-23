@@ -3,6 +3,9 @@ dqProfileApp:
     url: ""
     username: ""
     password: ""
+  qns-svc:
+    baseUrl: ""
+    code: ""
 spring:
   jmx:
     default-domain: com.ms.cse
