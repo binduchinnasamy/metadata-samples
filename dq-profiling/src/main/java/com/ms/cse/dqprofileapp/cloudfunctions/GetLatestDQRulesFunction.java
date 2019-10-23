@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Function;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.ms.cse.dqprofileapp.extensions.TimestampExtension;
+import com.ms.cse.dqprofileapp.models.FunctionInput;
 import com.ms.cse.dqprofileapp.models.RulesInfo;
 import com.ms.cse.dqprofileapp.repositories.RulesInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +18,9 @@ public class GetLatestDQRulesFunction {
     private RulesInfoRepository rulesInfoRepository;
 
     @Bean
-    public Function<Timestamp, List<RulesInfo>> getLatestDQRules(ExecutionContext targetContext) {
-        return waterMarkDate -> {
-            List<RulesInfo> rulesInfo = rulesInfoRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(waterMarkDate, TimestampExtension.now());
-            
+    public Function<FunctionInput, List<RulesInfo>> getLatestDQRules() {
+        return input -> {
+            List<RulesInfo> rulesInfo = rulesInfoRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(input.getTimeStamp(), TimestampExtension.now());
             return rulesInfo;
         };
     }

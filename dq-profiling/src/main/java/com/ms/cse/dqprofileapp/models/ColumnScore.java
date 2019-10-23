@@ -34,7 +34,7 @@ public class ColumnScore {
     @Setter
     private int totalRows;
 
-    @Column(name = "\"Update Timestamp\"")
+    @Column(name = "\"Update Timestamp\"")
     @Getter
     @Setter
     private Timestamp updateTimestamp;
