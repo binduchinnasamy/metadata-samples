@@ -20,7 +20,6 @@ public class DQRulesHandler extends AzureSpringBootRequestHandler<Timestamp, Lis
             @TimerTrigger(name = "getLatestDQRulesTrigger", schedule = "0 */2 * * * *") String timerInfo,
             ExecutionContext context) {
 
-        // Use getLast() from scheduleStatus
         ScheduleStatus scheduleStatus = ScheduleStatus.Deserialize(timerInfo);
 
         List<RulesInfo> rulesInfos = handleRequest(scheduleStatus.getLast() == null ? TimestampExtension.now() : scheduleStatus.getLast(), context);

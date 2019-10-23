@@ -33,3 +33,8 @@ hs_err_pid*
 local.settings.json
 bin/
 obj/
+
+/.classpath
+/.factorypath
+/.project
+/.settings/
