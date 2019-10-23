@@ -10,7 +10,6 @@ import com.ms.cse.dqprofileapp.models.ScheduleStatus;
 import org.springframework.cloud.function.adapter.azure.AzureSpringBootRequestHandler;
 import org.springframework.context.annotation.ComponentScan;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 @ComponentScan(basePackages={"com.ms.cse.dqprofileapp"})

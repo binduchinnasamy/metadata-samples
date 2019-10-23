@@ -14,7 +14,6 @@ import java.util.List;
 
 @ComponentScan(basePackages={"com.ms.cse.dqprofileapp"})
 public class ColumnScoreHandler extends AzureSpringBootRequestHandler<FunctionInput, List<ColumnScore>> {
-
     @FunctionName("getCurrentColumnScores")
     public List<ColumnScore> execute(
             @TimerTrigger(name = "getCurrentColumnScoresTrigger", schedule = "0 */2 * * * *") String timerInfo,

@@ -14,7 +14,7 @@ import java.util.List;
 
 //@ComponentScan(basePackages={"com.ms.cse.dqprofileapp"})
 public class EntityScoreHandler extends AzureSpringBootRequestHandler<Timestamp, List<EntityScore>> {
-
+    
     //@FunctionName("getCurrentEntityScores")
     public List<EntityScore> execute(
             @TimerTrigger(name = "getCurrentEntityScoresTrigger", schedule = "0 */2 * * * *") String timerInfo,
