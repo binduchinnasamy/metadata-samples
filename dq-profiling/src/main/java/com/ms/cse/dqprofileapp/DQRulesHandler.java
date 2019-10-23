@@ -25,6 +25,7 @@ public class DQRulesHandler extends AzureSpringBootRequestHandler<FunctionInput,
         input.setTimeStamp(scheduleStatus.getLast() == null ? TimestampExtension.now() : scheduleStatus.getLast());
         input.setExecutionContext(context);
         List<RulesInfo> rulesInfos = handleRequest(input, context);
+        
         return rulesInfos;
     }
 }

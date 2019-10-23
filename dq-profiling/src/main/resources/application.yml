@@ -6,6 +6,12 @@ dqProfileApp:
   qns-svc:
     baseUrl: ""
     code: ""
+  jsoncreator-svc:
+    baseUrl: ""
+    code: ""
+  atlaswrapper-svc:
+    baseUrl: ""
+    code: ""     
 spring:
   jmx:
     default-domain: com.ms.cse
