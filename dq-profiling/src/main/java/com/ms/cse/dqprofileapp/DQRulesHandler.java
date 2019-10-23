@@ -4,6 +4,7 @@ import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.TimerTrigger;
 import com.ms.cse.dqprofileapp.extensions.TimestampExtension;
+import com.ms.cse.dqprofileapp.models.FunctionInput;
 import com.ms.cse.dqprofileapp.models.RulesInfo;
 import com.ms.cse.dqprofileapp.models.ScheduleStatus;
 import org.springframework.cloud.function.adapter.azure.AzureSpringBootRequestHandler;
@@ -13,7 +14,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @ComponentScan(basePackages={"com.ms.cse.dqprofileapp"})
-public class DQRulesHandler extends AzureSpringBootRequestHandler<Timestamp, List<RulesInfo>> {
+public class DQRulesHandler extends AzureSpringBootRequestHandler<FunctionInput, List<RulesInfo>> {
 
     @FunctionName("getLatestDQRules")
     public List<RulesInfo> execute(
@@ -21,7 +22,10 @@ public class DQRulesHandler extends AzureSpringBootRequestHandler<Timestamp, Lis
             ExecutionContext context) {
 
         ScheduleStatus scheduleStatus = ScheduleStatus.Deserialize(timerInfo);
-        List<RulesInfo> rulesInfos = handleRequest(scheduleStatus.getLast() == null ? TimestampExtension.now() : scheduleStatus.getLast(), context);
+        FunctionInput input = new FunctionInput();
+        input.setTimeStamp(scheduleStatus.getLast() == null ? TimestampExtension.now() : scheduleStatus.getLast());
+        input.setExecutionContext(context);
+        List<RulesInfo> rulesInfos = handleRequest(input, context);
         return rulesInfos;
     }
 }
