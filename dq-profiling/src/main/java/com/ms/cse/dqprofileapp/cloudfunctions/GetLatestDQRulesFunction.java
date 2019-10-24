@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import com.ms.cse.dqprofileapp.models.*;
 import kong.unirest.JsonNode;
+import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
 
 import com.ms.cse.dqprofileapp.clients.*;
@@ -116,7 +117,49 @@ public class GetLatestDQRulesFunction {
                         String qualifiedName = entity.getJSONObject("attributes").getString("qualifiedName");
 
                         if (typeName.equalsIgnoreCase("column") && qualifiedName.equalsIgnoreCase(ruleInfo.getColumnFQDN())){
-                            String colguid = entity.getString("guid");
+                            String entityId = entity.getString("guid");
+
+                            //get atlas entity using its guid
+                            JsonNode colEntity = atlasWrapperClient.getEntity(entityId);
+
+                            //enity.attriburtes.dq_rules[] null or empty
+                            JSONArray dqRules = colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").getJSONArray("dq_rules");
+
+                            RuleAttribute ra = new RuleAttribute();
+                            ra.setQualifiedName(qualifiedNameResponse.getQualifiedName());
+                            ra.setRule_id(ruleInfo.getRuleId());
+
+                            Rule r = new Rule();
+                            r.setGuid(ruleIdUUID.toString());
+                            r.setTypeName("dq_rule");
+                            r.setUniqueAttributes(ra);
+
+                            if ( dqRules == null || dqRules.isEmpty()) {
+                                dqRules = new JSONArray();
+                                dqRules.put(r);
+                            }
+                            else {
+                                JSONArray dqrulesarr = colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").getJSONArray("dq_rules");
+                                Boolean dqruleFound = false;
+
+                                for (Object oobj : dqrulesarr) {
+                                    JSONObject dqrule = (JSONObject) oobj;
+
+                                    //dq_rules with guid exists
+                                    if (dqrule.getString("guid").equalsIgnoreCase(ruleIdUUID.toString())) {
+                                        dqruleFound = true;
+                                        break;
+                                    }
+                                }
+                                //dq_rules with no match
+                                if (!dqruleFound) {
+                                    dqRules.put(r);
+                                }
+                            }
+
+                            colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").remove("dq_rules");
+                            colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").put("dq_rules", dqRules);
+
                         }
                     }
                 }
