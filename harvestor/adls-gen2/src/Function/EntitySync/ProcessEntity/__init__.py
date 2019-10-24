@@ -88,13 +88,14 @@ def main(blob: func.InputStream):
             # Add Account            
             final_list.append(storageac_json_qns['entity'])            
             # call json generator service
-            logging.info("calling JSON Generator")               
-            return_json=httpPoster(final_list,json_generator_url)
+            logging.info("calling JSON Generator")
+            json_request=json.dumps(final_list)               
+            return_json=httpPoster(json_request,json_generator_url)
             if return_json.status_code == 200:
                 logging.info("Calling the final API layer")
-                json_entity_objects=json.loads(return_json.text)
+                #json_entity_objects=json.loads(return_json.text)
                 # call Json api access service                           
-                api_output = httpPoster(json_entity_objects,api_access_layer_url)
+                api_output = httpPoster(return_json.text,api_access_layer_url)
                 if api_output.status_code ==200:
                     logging.info("File processed successfully!")
                 else:
@@ -108,7 +109,8 @@ def httpPoster(input_content, url):
     #test_json=json.dumps(input_content)
     try:        
         headers = {'Content-type': 'application/json'}
-        response = requests.post(url,data=json.dumps(input_content),headers=headers)              
+        #response = requests.post(url,data=json.dumps(input_content),headers=headers)
+        response = requests.post(url,data=input_content,headers=headers)              
         return response
     except Exception as e:        
         logging.error("error occured in calling json generator: "+e)
@@ -128,8 +130,12 @@ def validatewithQNS(input_content, qns_service_url, adls_gen2_uri, file_system, 
     elif entity_type=='resourceset':
         entities_with_qns=[]
         for entity in input_content:
+            logging.info("calling QNS for resource set-"+entity['attributes'][1]['attr_value'])
             entity_with_qns=process_entity(entity,adls_gen2_uri,file_system,qns_service_url, entity_type)
-            entities_with_qns.append(entity_with_qns)       
+            if entity_with_qns:
+                entities_with_qns.append(entity_with_qns)
+            else:
+                logging.error("Error while calling QNS for resource set-"+entity['attributes'][1]['attr_value'])       
         #return entities_with_qns
         return {'entity':entities_with_qns,'guid':''}
 

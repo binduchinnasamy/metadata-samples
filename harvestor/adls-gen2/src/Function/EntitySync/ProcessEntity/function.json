@@ -6,7 +6,7 @@
       "type": "blobTrigger",
       "direction": "in",
       "path": "databricksoutput",
-      "connection": "wmtdemo_STORAGE"
+      "connection": "trigger_STORAGE"
     }
   ]
 }
