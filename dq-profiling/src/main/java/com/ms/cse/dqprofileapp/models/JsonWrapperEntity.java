@@ -20,7 +20,7 @@ public class JsonWrapperEntity {
     private String created_by;
 
     public static JsonWrapperEntity create(RulesInfo ruleInfo) {
-        JsonWrapperEntityAttribute[] attributes = new JsonWrapperEntityAttribute[3];
+        JsonWrapperEntityAttribute[] attributes = new JsonWrapperEntityAttribute[4];
 
         // rule_id
         JsonWrapperEntityAttribute ruleIdAttr = new JsonWrapperEntityAttribute();
@@ -28,17 +28,23 @@ public class JsonWrapperEntity {
         ruleIdAttr.setAttr_value(ruleInfo.getRuleId());
         attributes[0] = ruleIdAttr;
 
+        // rule name
+        JsonWrapperEntityAttribute ruleNameAttr = new JsonWrapperEntityAttribute();
+        ruleNameAttr.setAttr_name("rule_name");
+        ruleNameAttr.setAttr_value(ruleInfo.getRuleName());
+        attributes[1] = ruleNameAttr;
+
         // name
         JsonWrapperEntityAttribute nameAttr = new JsonWrapperEntityAttribute();
         nameAttr.setAttr_name("name");
-        nameAttr.setAttr_value(ruleInfo.getRuleId());
-        attributes[1] = nameAttr;
+        nameAttr.setAttr_value(ruleInfo.getRuleName());
+        attributes[2] = nameAttr;
 
         // qualifiedName
         JsonWrapperEntityAttribute qualifiedNameAttr = new JsonWrapperEntityAttribute();
         qualifiedNameAttr.setAttr_name("qualifiedName");
         qualifiedNameAttr.setAttr_value(ruleInfo.getColumnFQDN());
-        attributes[2] = qualifiedNameAttr;
+        attributes[3] = qualifiedNameAttr;
 
         JsonWrapperEntity entity = new JsonWrapperEntity();
         entity.setEntity_type_name("dq_rule");
