@@ -8,4 +8,7 @@ public class MutatedEntityAttributes {
     @Setter
     private String rule_id;
 
+    @Getter
+    @Setter
+    private String qualifiedName;
 }

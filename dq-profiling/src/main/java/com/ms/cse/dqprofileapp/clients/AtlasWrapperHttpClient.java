@@ -6,7 +6,11 @@ import com.ms.cse.dqprofileapp.models.MutatedEntities;
 import com.ms.cse.dqprofileapp.models.QualifiedNameServiceResponse;
 import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
+import kong.unirest.RequestBodyEntity;
 import kong.unirest.Unirest;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
 
 public class AtlasWrapperHttpClient{
 //url + "entity/bulk"
@@ -30,20 +34,54 @@ public class AtlasWrapperHttpClient{
         return single_instance;
     }
 
-    public MutatedEntities createBulk(JsonNode requestBody){
+    public JsonNode getEntity(String entityGuid){
+        //String searchUrl = this.baseUrl + "entity/" + entityGuid;
+        String searchUrl = "http://admin:admin@52.139.239.151:21000/api/atlas/v2/" + "entity/" + entityGuid; //TODO: replace direct atlas call with wrapper when implemented
+
+        HttpResponse<JsonNode> result = Unirest.get(searchUrl)
+                .asJson();
+        
+        return result.getBody();
+    }
+    public JsonNode search(String criteria){
+        String searchUrl = this.baseUrl + "search";
+        String urlEncodedCriteria = encodeString(criteria);
+
+        HttpResponse<JsonNode> result = Unirest.get(searchUrl)
+                                                .queryString("query", urlEncodedCriteria)
+                                                .asJson();
+
+        return result.getBody();
+    }
+    public JsonNode create(JsonNode requestBody){
         String entityBulkUrl = this.baseUrl + "entity/bulk";
 
-        HttpResponse<MutatedEntities> response =
+        HttpResponse<JsonNode> responseBody =
                 Unirest.post(entityBulkUrl)
-                    .header("Content-Type", "application/json")
-                    .body(requestBody)
-                    .asObject(MutatedEntities.class);
+                        .header("Content-Type", "application/json")
+                        .body(requestBody)
+                        .asJson();
 
-        MutatedEntities mutatedEntities = response.getBody();
+        System.out.println("createBulk.mutatedEntities: " + responseBody.getBody().toPrettyString());
 
-        logger.info(mutatedEntities.toString());
-        System.out.println("createBulk.mutatedEntities: " + mutatedEntities.toString());
+        //        HttpResponse<MutatedEntities> response =
+        //                Unirest.post(entityBulkUrl)
+        //                    .header("Content-Type", "application/json")
+        //                    .body(requestBody)
+        //                    .asObject(MutatedEntities.class);
+
+        //        MutatedEntities mutatedEntities = response.getBody();
+        //
+        //        logger.info(mutatedEntities.toString());
+        //        System.out.println("createBulk.mutatedEntities: " + mutatedEntities.toString());
         
-        return mutatedEntities;
+        return responseBody.getBody();
+    }
+    private String encodeString(String value) {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex.getCause());
+        }
     }
 }
