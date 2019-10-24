@@ -1,5 +1,6 @@
 package com.ms.cse.dqprofileapp.cloudfunctions;
 
+import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,8 +66,8 @@ public class GetLatestDQRulesFunction {
                 System.out.println("jsonWrapperEntities:" + jsonWrapperEntities.toPrettyString());
                 
                 //take output json and call atlaswrapper create bulk entity
-                JsonNode mutatedEntities = atlasWrapperClient.createBulk(jsonWrapperEntities);
-                System.out.println("mutatedEntities: " + mutatedEntities.toPrettyString());
+                MutatedEntities mutatedEntities = atlasWrapperClient.createBulk(jsonWrapperEntities);
+                System.out.println("mutatedEntities: " + mutatedEntities.toString());
 
                 /*
                 {
@@ -93,9 +94,15 @@ public class GetLatestDQRulesFunction {
                 */
 
                 //extract guids of created entities from mutatedEntities.guidAssignments
-                JSONObject guids = mutatedEntities.getObject().getJSONObject("mutatedEntities.guidAssignments");
-                
+                List<UUID> guids = new ArrayList<UUID>();
+                for (MutatedEntity mutatedEntity : mutatedEntities.getCREATE()) {
+                    guids.add(mutatedEntity.getGuid());
+                }
+
                 System.out.println("guids: " + guids.toString());
+
+                //call atlaswrapper t0 get fqdn of the columnt entity from original rulesInfo
+
             }
 
             return rulesInfo;

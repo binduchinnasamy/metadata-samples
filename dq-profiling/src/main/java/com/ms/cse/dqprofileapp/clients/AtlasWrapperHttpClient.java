@@ -2,6 +2,8 @@ package com.ms.cse.dqprofileapp.clients;
 
 import java.util.logging.Logger;
 
+import com.ms.cse.dqprofileapp.models.MutatedEntities;
+import com.ms.cse.dqprofileapp.models.QualifiedNameServiceResponse;
 import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
@@ -28,18 +30,20 @@ public class AtlasWrapperHttpClient{
         return single_instance;
     }
 
-    public JsonNode createBulk(JsonNode requestBody){
+    public MutatedEntities createBulk(JsonNode requestBody){
         String entityBulkUrl = this.baseUrl + "entity/bulk";
 
-        HttpResponse<JsonNode> response =
+        HttpResponse<MutatedEntities> response =
                 Unirest.post(entityBulkUrl)
                     .header("Content-Type", "application/json")
                     .body(requestBody)
-                    .asJson();
+                    .asObject(MutatedEntities.class);
+
+        MutatedEntities mutatedEntities = response.getBody();
+
+        logger.info(mutatedEntities.toString());
+        System.out.println("createBulk.mutatedEntities: " + mutatedEntities.toString());
         
-        logger.info(response.getBody().toPrettyString());       
-        System.out.println(response.getBody().toPrettyString());
-        
-        return response.getBody();
+        return mutatedEntities;
     }
 }

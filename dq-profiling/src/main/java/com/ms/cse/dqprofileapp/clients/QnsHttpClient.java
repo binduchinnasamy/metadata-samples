@@ -43,9 +43,11 @@ public class QnsHttpClient {
                         .queryString("typeName", typeName)
                         .body(jsonBody)
                         .asObject(QualifiedNameServiceResponse.class);
-        
-        logger.info(response.getBody().toString());
-        System.out.println(response.getBody().toString());
+
+        QualifiedNameServiceResponse qnsResponse = response.getBody();
+
+        logger.info(qnsResponse.toString());
+        System.out.println("getQualifiedName.qnsResponse: " + qnsResponse.toString());
 
         return response.getBody();
     }
