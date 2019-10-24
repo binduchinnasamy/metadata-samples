@@ -19,7 +19,7 @@ public class JsonWrapperEntity {
     @Setter
     private String created_by;
 
-    public static JsonWrapperEntity create(RulesInfo ruleInfo) {
+    public static JsonWrapperEntity create(RulesInfo ruleInfo, String qualifiedName) {
         JsonWrapperEntityAttribute[] attributes = new JsonWrapperEntityAttribute[4];
 
         // rule_id
@@ -43,7 +43,7 @@ public class JsonWrapperEntity {
         // qualifiedName
         JsonWrapperEntityAttribute qualifiedNameAttr = new JsonWrapperEntityAttribute();
         qualifiedNameAttr.setAttr_name("qualifiedName");
-        qualifiedNameAttr.setAttr_value(ruleInfo.getColumnFQDN());
+        qualifiedNameAttr.setAttr_value(qualifiedName);
         attributes[3] = qualifiedNameAttr;
 
         JsonWrapperEntity entity = new JsonWrapperEntity();
