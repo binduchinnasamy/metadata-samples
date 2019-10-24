@@ -5,17 +5,9 @@ import java.util.logging.Logger;
 import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
-import kong.unirest.json.JSONObject;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.io.UnsupportedEncodingException;
 
 public class AtlasWrapperHttpClient{
-//url + "entity/bulk"
-
     private static AtlasWrapperHttpClient single_instance = null;
-
     private Logger logger;
     private String baseUrl;
 
@@ -33,65 +25,53 @@ public class AtlasWrapperHttpClient{
         return single_instance;
     }
 
-    public void createEntity(String entityGuid, JSONObject entity){
+    public void createEntity(String entityGuid, JsonNode entity){
         String entityBulkUrl = this.baseUrl + "entity/guid/" + entityGuid;
-
-        HttpResponse<JsonNode> responseBody =
-                Unirest.post(entityBulkUrl)
+        HttpResponse<JsonNode> response =
+                Unirest.put(entityBulkUrl)
                         .header("Content-Type", "application/json")
                         .body(entity)
                         .asJson();
 
-        System.out.println("createEntity.responseBody: " + responseBody.getBody().toPrettyString());
+        System.out.println("createEntity.responseBody: " + response.getBody().toPrettyString());
+        logger.info("createEntity.responseBody: " + response.getBody().toPrettyString());
     }
+
     public JsonNode getEntity(String entityGuid){
-        //String searchUrl = this.baseUrl + "entity/guid/" + entityGuid;
-        String searchUrl = "http://admin:admin@52.139.239.151:21000/api/atlas/v2/" + "entity/guid/" + entityGuid;
+        String searchUrl = this.baseUrl + "entity/guid/" + entityGuid;
+        //String searchUrl = "http://admin:admin@52.139.239.151:21000/api/atlas/v2/" + "entity/guid/" + entityGuid;
+        HttpResponse<JsonNode> response = Unirest.get(searchUrl).asJson();
 
-        HttpResponse<JsonNode> result = Unirest.get(searchUrl)
-                .asJson();
+        System.out.println("getEntity: " + response.getBody().toPrettyString());
+        logger.info("getEntity: " + response.getBody().toPrettyString());
 
-        return result.getBody();
+        return response.getBody();
     }
+
     public JsonNode search(String criteria){
         String searchUrl = this.baseUrl + "search";
-        //String urlEncodedCriteria = encodeString(criteria);
+        HttpResponse<JsonNode> response =
+                Unirest.get(searchUrl)
+                        .queryString("query", criteria)
+                        .asJson();
 
-        HttpResponse<JsonNode> result = Unirest.get(searchUrl)
-                                                .queryString("query", criteria)
-                                                .asJson();
+        System.out.println("search: " + response.getBody().toPrettyString());
+        logger.info("search: " + response.getBody().toPrettyString());
 
-        return result.getBody();
+        return response.getBody();
     }
-    public JsonNode create(JsonNode requestBody){
-        String entityBulkUrl = this.baseUrl + "entity/bulk";
 
-        HttpResponse<JsonNode> responseBody =
+    public JsonNode createBulk(JsonNode requestBody){
+        String entityBulkUrl = this.baseUrl + "entity/bulk";
+        HttpResponse<JsonNode> response =
                 Unirest.post(entityBulkUrl)
                         .header("Content-Type", "application/json")
                         .body(requestBody)
                         .asJson();
 
-        System.out.println("createBulk.mutatedEntities: " + responseBody.getBody().toPrettyString());
+        System.out.println("createBulk.mutatedEntities: " + response.getBody().toPrettyString());
+        logger.info("createBulk.mutatedEntities: " + response.getBody().toPrettyString());
 
-        //        HttpResponse<MutatedEntities> response =
-        //                Unirest.post(entityBulkUrl)
-        //                    .header("Content-Type", "application/json")
-        //                    .body(requestBody)
-        //                    .asObject(MutatedEntities.class);
-
-        //        MutatedEntities mutatedEntities = response.getBody();
-        //
-        //        logger.info(mutatedEntities.toString());
-        //        System.out.println("createBulk.mutatedEntities: " + mutatedEntities.toString());
-        
-        return responseBody.getBody();
-    }
-    private String encodeString(String value) {
-        try {
-            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException ex) {
-            throw new RuntimeException(ex.getCause());
-        }
+        return response.getBody();
     }
 }

@@ -46,8 +46,6 @@ public class GetLatestDQRulesFunction {
             JsonCreatorHttpClient jsonCreatorClient = JsonCreatorHttpClient.getInstance(this.jsonCreatorSvcUrl, this.jsonCreatorSvcCode, logger);
             AtlasWrapperHttpClient atlasWrapperClient = AtlasWrapperHttpClient.getInstance(this.atlasWrapperSvcUrl, logger);
 
-            Dictionary colfqnDictionary = new Hashtable();
-
             //List<RulesInfo> rulesInfo = rulesInfoRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(input.getTimeStamp(), TimestampExtension.now());
             List<RulesInfo> rulesInfo = (List<RulesInfo>) rulesInfoRepository.findAll();
             List<JsonWrapperEntity> entities = new ArrayList<JsonWrapperEntity>();
@@ -56,9 +54,6 @@ public class GetLatestDQRulesFunction {
 
                 for (RulesInfo ruleInfo : rulesInfo) {
                     entities.clear();
-
-                    colfqnDictionary.put(ruleInfo.getColumnFQDN(), new ArrayList<String>());
-
                     QualifiedNameServiceResponse qualifiedNameResponse = qnsClient.getQualifiedName(ruleInfo.getColumnFQDN(), ruleInfo.getRuleId());
                     System.out.println("qualifiedNameResponse:" + qualifiedNameResponse.toString());
                     UUID ruleIdUUID;
@@ -70,43 +65,16 @@ public class GetLatestDQRulesFunction {
                         System.out.println("jsonWrapperEntities:" + jsonWrapperEntities.toPrettyString());
 
                         //take output json and call atlaswrapper create bulk entity
-                        JsonNode mutatedEntities = atlasWrapperClient.create(jsonWrapperEntities);
+                        JsonNode mutatedEntities = atlasWrapperClient.createBulk(jsonWrapperEntities);
                         String uuid = mutatedEntities.getObject().getJSONObject("mutatedEntities").getJSONArray("CREATE").getJSONObject(0).getString("guid");
 
                         System.out.println("uuid: " + uuid);
-
-                        //TODO: throw if mutatedEntities == null
-
-                    /*
-                    {
-                        "mutatedEntities": {
-                            "CREATE": [{
-                                "typeName": "dq_rule",
-                                "attributes": {
-                                    "rule_id": "rule1"
-                                },
-                                "guid": "0a3ea624-6bea-4322-bc49-92942d1297f1"
-                            }, {
-                                "typeName": "dq_rule",
-                                "attributes": {
-                                    "rule_id": "rule2"
-                                },
-                                "guid": "07f09b27-f38f-4b5c-bec0-af7b54acccb3"
-                            }]
-                        },
-                        "guidAssignments": {
-                            "-77653153359712": "07f09b27-f38f-4b5c-bec0-af7b54acccb3",
-                            "-77653153359711": "0a3ea624-6bea-4322-bc49-92942d1297f1"
-                        }
-                    }
-                    */
-
                         ruleIdUUID = UUID.fromString(uuid);
                     } else { //rule already existed
                         ruleIdUUID = qualifiedNameResponse.getGuid();
                     }
 
-                    //cally atlas to find the column entit
+                    //call atlas to find the column entity
                     String searchCriteria = "column+where+qualifiedName=" + ruleInfo.getColumnFQDN();
 
                     JsonNode searchResult = atlasWrapperClient.search(searchCriteria);
@@ -118,57 +86,10 @@ public class GetLatestDQRulesFunction {
 
                         if (typeName.equalsIgnoreCase("column") && qualifiedName.equalsIgnoreCase(ruleInfo.getColumnFQDN())){
                             String entityId = entity.getString("guid");
-
                             //get atlas entity using its guid
                             JsonNode colEntity = atlasWrapperClient.getEntity(entityId);
-
-                            //enity.attriburtes.dq_rules[] null or empty
-                            JSONArray dqRules = colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").getJSONArray("dq_rules");
-
-                            //RuleAttribute ra = new RuleAttribute();
-                            //ra.setQualifiedName(qualifiedNameResponse.getQualifiedName());
-                            //ra.setRule_id(ruleInfo.getRuleId());
-                            //
-                            //Rule r = new Rule();
-                            //r.setGuid(ruleIdUUID.toString());
-                            //r.setTypeName("dq_rule");
-                            //r.setUniqueAttributes(ra);
-
-                            JSONObject ra = new JSONObject();
-                            ra.put("qualifiedName", qualifiedNameResponse.getQualifiedName());
-                            ra.put("rule_id", ruleInfo.getRuleId());
-
-                            JSONObject r = new JSONObject();
-                            r.put("guid", ruleIdUUID.toString());
-                            r.put("typeName", "dq_rule");
-                            r.put("uniqueAttributes", ra);
-
-                            if ( dqRules == null || dqRules.isEmpty()) {
-                                dqRules = new JSONArray();
-                                dqRules.put(r);
-                            }
-                            else {
-                                JSONArray dqrulesarr = colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").getJSONArray("dq_rules");
-                                Boolean dqruleFound = false;
-
-                                for (Object oobj : dqrulesarr) {
-                                    JSONObject dqrule = (JSONObject) oobj;
-
-                                    //dq_rules with guid exists
-                                    if (dqrule.getString("guid").equalsIgnoreCase(ruleIdUUID.toString())) {
-                                        dqruleFound = true;
-                                        break;
-                                    }
-                                }
-                                //dq_rules with no match
-                                if (!dqruleFound) {
-                                    dqRules.put(r);
-                                }
-                            }
-
-                            colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").remove("dq_rules");
-                            colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").put("dq_rules", dqRules);
-
+                            colEntity = PrepareColumnWithRules(colEntity, qualifiedNameResponse.getQualifiedName(), ruleInfo.getRuleId(), ruleIdUUID.toString());
+                            atlasWrapperClient.createEntity(entityId, colEntity);
                         }
                     }
                 }
@@ -179,5 +100,42 @@ public class GetLatestDQRulesFunction {
 
             return rulesInfo;
         };
+    }
+
+    private JsonNode PrepareColumnWithRules(JsonNode colEntity, String qualifiedName, String ruleId, String ruleIdUUID) {
+        //entity.attriburtes.dq_rules[] null or empty
+        JSONArray dqRules = colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").getJSONArray("dq_rules");
+
+        JSONObject dqRuleAttributes = new JSONObject();
+        dqRuleAttributes.put("qualifiedName", qualifiedName);
+        dqRuleAttributes.put("rule_id", ruleId);
+
+        JSONObject dqRule = new JSONObject();
+        dqRule.put("guid", ruleIdUUID);
+        dqRule.put("typeName", "dq_rule");
+        dqRule.put("uniqueAttributes", dqRuleAttributes);
+
+        if (dqRules == null || dqRules.isEmpty()) {
+            dqRules = new JSONArray();
+            dqRules.put(dqRule);
+        }
+        else {
+            boolean dqRuleExits = false;
+            for (Object obj : dqRules) {
+                //dq_rules with guid exists
+                if (((JSONObject) obj).getString("guid").equalsIgnoreCase(ruleIdUUID)) {
+                    dqRuleExits = true;
+                    break;
+                }
+            }
+            //dq_rules with no match
+            if (!dqRuleExits) {
+                dqRules.put(dqRule);
+            }
+        }
+
+        colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").remove("dq_rules");
+        colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").put("dq_rules", dqRules);
+        return colEntity;
     }
 }
