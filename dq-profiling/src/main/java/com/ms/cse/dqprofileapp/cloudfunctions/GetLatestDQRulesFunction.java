@@ -30,6 +30,9 @@ public class GetLatestDQRulesFunction {
     @Value("${dqProfileApp.jsoncreator-svc.code}")
     private String jsonCreatorSvcCode;
 
+    @Value("${dqProfileApp.atlaswrapper-svc.baseUrl}")
+    private String atlasWrapperSvcUrl;
+
     @Autowired
     private RulesInfoRepository rulesInfoRepository;
 
@@ -38,16 +41,12 @@ public class GetLatestDQRulesFunction {
         return input -> {
             Logger logger = input.getExecutionContext().getLogger();
             QnsHttpClient qnsClient = QnsHttpClient.getInstance(this.qnsSvcUrl, this.qnsSvcCode, logger);
-            JsonCreatorHttpClient jsonCreatorClient = JsonCreatorHttpClient.getInstance(this.jsonCreatorSvcUrl, this.jsonCreatorSvcCode, logger);
 
             //List<RulesInfo> rulesInfo = rulesInfoRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(input.getTimeStamp(), TimestampExtension.now());
-            List<RulesInfo> rulesInfo = (List) rulesInfoRepository.findAll();
+            List<RulesInfo> rulesInfo = (List<RulesInfo>) rulesInfoRepository.findAll();
             List<JsonWrapperEntity> entities = new ArrayList<JsonWrapperEntity>();
             
             for (RulesInfo ruleInfo : rulesInfo) {                
-                //"storageuri/filesystemname/f1/f2/f3";
-                //"rule1";
-
                 QualifiedNameServiceResponse qualifiedNameResponse = qnsClient.getQualifiedName(ruleInfo.getColumnFQDN(), ruleInfo.getRuleId());
 
                 if (!qualifiedNameResponse.isExists()){
@@ -57,9 +56,17 @@ public class GetLatestDQRulesFunction {
             }
 
             if(entities.size() > 0) {
-                JsonNode json = jsonCreatorClient.getJson(JsonWrapperEntity.from(entities));
-                System.out.println(json.toPrettyString());
+                JsonCreatorHttpClient jsonCreatorClient = JsonCreatorHttpClient.getInstance(this.jsonCreatorSvcUrl, this.jsonCreatorSvcCode, logger);
+                AtlasWrapperHttpClient atlasWrapperClient = AtlasWrapperHttpClient.getInstance(this.atlasWrapperSvcUrl, logger);
+                
+                JsonNode jsonWrapperEntities = jsonCreatorClient.getJson(JsonWrapperEntity.from(entities));
+                System.out.println(jsonWrapperEntities.toPrettyString());
+                
+                //take output json and call atlaswrapper create bulk entity
+                JsonNode mutatedEntities = atlasWrapperClient.createBulk(jsonWrapperEntities);
+                System.out.println(mutatedEntities.toPrettyString());
             }
+
             return rulesInfo;
         };
     }
