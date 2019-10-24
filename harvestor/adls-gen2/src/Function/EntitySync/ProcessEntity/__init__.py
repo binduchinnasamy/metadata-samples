@@ -6,9 +6,9 @@ import azure.functions as func
 
 
 def main(blob: func.InputStream):
-    logging.info("Python blob trigger function processed blob")                
+    logging.info("Blob trigger function started processing blob")                
     blob_size=blob.length
-
+    logging.info("Accessing application settings")
     json_generator_url = os.environ["json_generator_url"]
     api_access_layer_url = os.environ["api_access_layer_url"]
     qns_service_url=os.environ["qns_url"]
@@ -35,21 +35,22 @@ def main(blob: func.InputStream):
         
         final_list=[]
         if resource_set_json and filesystem_json and resource_set_json:            
-                      
+            logging.info("Calling QNS for storage account")          
             storageac_json_qns=validatewithQNS(storage_ac_json,qns_service_url,adls_gen2_url,filesystem_name,'storageac')
+            logging.info("Calling QNS for Service")
             service_json_qns=validatewithQNS(service_json,qns_service_url,adls_gen2_url,filesystem_name,'service')
+            logging.info("Calling QNS for Filesystem")
             filesystem_json_qns=validatewithQNS(filesystem_json,qns_service_url,adls_gen2_url,filesystem_name,'filesystem')
+            logging.info("Calling QNS for Resourceset")
             resource_set_json_qns=validatewithQNS(resource_set_json,qns_service_url,adls_gen2_url,filesystem_name,'resourceset')
             
-            #guidvalue=storageac_json_qns["attributes"]
-            if storageac_json_qns["guid"]:
+            if 'guid' in storageac_json_qns:
                 guids['azure_storage_account']=storageac_json_qns["guid"]
-            if service_json_qns["guid"]:
+            if 'guid' in service_json_qns:
                 guids['azure_datalake_gen2_service']=service_json_qns["guid"]
-            if filesystem_json_qns['guid']:
+            if 'guid' in filesystem_json_qns:
                 guids['azure_datalake_gen2_filesystem']=filesystem_json_qns["guid"]
             
-            #final_list.append(resource_set_json_qns)
             # Add Resource Set -1            
             for entity in resource_set_json_qns['entity']:
                 resourceset_link_object={
@@ -87,22 +88,24 @@ def main(blob: func.InputStream):
             # Add Account            
             final_list.append(storageac_json_qns['entity'])            
             # call json generator service
-            test_json=json.dumps(final_list)    
-            return_json=httpPostJsonGenerator(final_list,json_generator_url)
+            logging.info("calling JSON Generator")               
+            return_json=httpPoster(final_list,json_generator_url)
             if return_json.status_code == 200:
+                logging.info("Calling the final API layer")
                 json_entity_objects=json.loads(return_json.text)
-                # call Json api access service
-                filteredvalue = json_entity_objects["entities"]
-                api_output = httpPostJsonGenerator(json_entity_objects,api_access_layer_url)
+                # call Json api access service                           
+                api_output = httpPoster(json_entity_objects,api_access_layer_url)
                 if api_output.status_code ==200:
-                    logging.info("Entity created successfully!")
+                    logging.info("File processed successfully!")
                 else:
                     logging.error("Error in calling meta access layer with error code:"+api_output.status_code + " "+api_output.text)
+            else:
+                logging.error("Error while calling JSON generator service with error code:"+return_json.status_code+" "+return_json.text)
         else:
             logging.error("input request json is empty")   
 
-def httpPostJsonGenerator(input_content, url):    
-    test_json=json.dumps(input_content)
+def httpPoster(input_content, url):    
+    #test_json=json.dumps(input_content)
     try:        
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,data=json.dumps(input_content),headers=headers)              
@@ -142,8 +145,7 @@ def process_entity(entity,adls_gen2_uri,file_system,qns_service_url, entity_type
             entity['attributes'][0]['attr_value'] =response_json['qualifiedName']
             guid_object ={
                 "guid":response_json['guid']
-            }
-            #entity['attributes'].append(guid_object)
+            }            
             entity['guid']=response_json['guid']
             guid=response_json['guid']       
         return {'entity':entity,'guid':guid}
