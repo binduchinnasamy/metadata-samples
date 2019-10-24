@@ -141,7 +141,7 @@ public class GetLatestDQRulesFunction {
                             JSONObject r = new JSONObject();
                             r.put("guid", ruleIdUUID.toString());
                             r.put("typeName", "dq_rule");
-                            r.put("attributes", ra);
+                            r.put("uniqueAttributes", ra);
 
                             if ( dqRules == null || dqRules.isEmpty()) {
                                 dqRules = new JSONArray();
