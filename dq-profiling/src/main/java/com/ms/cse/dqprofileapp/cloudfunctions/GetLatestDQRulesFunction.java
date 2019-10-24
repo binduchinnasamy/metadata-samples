@@ -52,7 +52,7 @@ public class GetLatestDQRulesFunction {
                 System.out.println("qualifiedNameResponse:" + qualifiedNameResponse.toString());
                                 
                 if (!qualifiedNameResponse.isExists()){
-                    JsonWrapperEntity entity = JsonWrapperEntity.create(ruleInfo);
+                    JsonWrapperEntity entity = JsonWrapperEntity.create(ruleInfo, qualifiedNameResponse.getQualifiedName());
                     entities.add(entity);
                 }
             }
