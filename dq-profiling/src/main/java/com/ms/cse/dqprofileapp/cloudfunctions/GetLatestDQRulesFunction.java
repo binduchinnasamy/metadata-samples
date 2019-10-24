@@ -125,14 +125,23 @@ public class GetLatestDQRulesFunction {
                             //enity.attriburtes.dq_rules[] null or empty
                             JSONArray dqRules = colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").getJSONArray("dq_rules");
 
-                            RuleAttribute ra = new RuleAttribute();
-                            ra.setQualifiedName(qualifiedNameResponse.getQualifiedName());
-                            ra.setRule_id(ruleInfo.getRuleId());
+                            //RuleAttribute ra = new RuleAttribute();
+                            //ra.setQualifiedName(qualifiedNameResponse.getQualifiedName());
+                            //ra.setRule_id(ruleInfo.getRuleId());
+                            //
+                            //Rule r = new Rule();
+                            //r.setGuid(ruleIdUUID.toString());
+                            //r.setTypeName("dq_rule");
+                            //r.setUniqueAttributes(ra);
 
-                            Rule r = new Rule();
-                            r.setGuid(ruleIdUUID.toString());
-                            r.setTypeName("dq_rule");
-                            r.setUniqueAttributes(ra);
+                            JSONObject ra = new JSONObject();
+                            ra.put("qualifiedName", qualifiedNameResponse.getQualifiedName());
+                            ra.put("rule_id", ruleInfo.getRuleId());
+
+                            JSONObject r = new JSONObject();
+                            r.put("guid", ruleIdUUID.toString());
+                            r.put("typeName", "dq_rule");
+                            r.put("attributes", ra);
 
                             if ( dqRules == null || dqRules.isEmpty()) {
                                 dqRules = new JSONArray();
