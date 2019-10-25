@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.function.Function;
 
+import com.ms.cse.dqprofileapp.extensions.TimestampExtension;
 import com.ms.cse.dqprofileapp.models.*;
 import kong.unirest.JsonNode;
 import kong.unirest.json.JSONArray;
@@ -54,7 +55,8 @@ public class GetLatestDQRulesFunction {
 
                 for (RulesInfo ruleInfo : rulesInfo) {
                     entities.clear();
-                    QualifiedNameServiceResponse qualifiedNameResponse = qnsClient.getQualifiedName(ruleInfo.getColumnFQDN(), ruleInfo.getRuleId());
+                    String columnFqdn = ruleInfo.getColumnFQDN();
+                    QualifiedNameServiceResponse qualifiedNameResponse = qnsClient.getQualifiedName(columnFqdn, ruleInfo.getRuleId());
                     System.out.println("qualifiedNameResponse:" + qualifiedNameResponse.toString());
                     UUID ruleIdUUID;
                     if (!qualifiedNameResponse.isExists()) { //rule doesn't exist, so go create it
@@ -75,7 +77,7 @@ public class GetLatestDQRulesFunction {
                     }
 
                     //call atlas to find the column entity
-                    String searchCriteria = "column+where+qualifiedName=" + ruleInfo.getColumnFQDN();
+                    String searchCriteria = "column+where+qualifiedName=" + columnFqdn;
 
                     JsonNode searchResult = atlasWrapperClient.search(searchCriteria);
                     for (Object obj : searchResult.getObject().getJSONArray("entities")){
@@ -84,12 +86,14 @@ public class GetLatestDQRulesFunction {
                         String typeName = entity.getString("typeName");
                         String qualifiedName = entity.getJSONObject("attributes").getString("qualifiedName");
 
-                        if (typeName.equalsIgnoreCase("column") && qualifiedName.equalsIgnoreCase(ruleInfo.getColumnFQDN())){
+                        if (typeName.equalsIgnoreCase("column") && qualifiedName.equalsIgnoreCase(columnFqdn)){
                             String entityId = entity.getString("guid");
+
                             //get atlas entity using its guid
                             JsonNode colEntity = atlasWrapperClient.getEntity(entityId);
+
                             colEntity = PrepareColumnWithRules(colEntity, qualifiedNameResponse.getQualifiedName(), ruleInfo.getRuleId(), ruleIdUUID.toString());
-                            atlasWrapperClient.createEntity(entityId, colEntity);
+                            atlasWrapperClient.createEntity(colEntity);
                         }
                     }
                 }

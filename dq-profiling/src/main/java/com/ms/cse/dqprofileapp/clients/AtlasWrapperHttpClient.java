@@ -25,10 +25,10 @@ public class AtlasWrapperHttpClient{
         return single_instance;
     }
 
-    public void createEntity(String entityGuid, JsonNode entity){
-        String entityBulkUrl = this.baseUrl + "entity/guid/" + entityGuid;
+    public void createEntity(JsonNode entity){
+        String entityBulkUrl = this.baseUrl + "entity";
         HttpResponse<JsonNode> response =
-                Unirest.put(entityBulkUrl)
+                Unirest.post(entityBulkUrl)
                         .header("Content-Type", "application/json")
                         .body(entity)
                         .asJson();
@@ -39,7 +39,6 @@ public class AtlasWrapperHttpClient{
 
     public JsonNode getEntity(String entityGuid){
         String searchUrl = this.baseUrl + "entity/guid/" + entityGuid;
-        //String searchUrl = "http://admin:admin@52.139.239.151:21000/api/atlas/v2/" + "entity/guid/" + entityGuid;
         HttpResponse<JsonNode> response = Unirest.get(searchUrl).asJson();
 
         System.out.println("getEntity: " + response.getBody().toPrettyString());
