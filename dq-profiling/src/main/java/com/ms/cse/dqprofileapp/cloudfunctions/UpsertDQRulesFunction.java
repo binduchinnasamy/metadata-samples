@@ -106,14 +106,6 @@ public class UpsertDQRulesFunction {
         };
     }
 
-    private JSONArray getDQRulesJSONArray(JSONObject attributes) {
-        if(attributes.has("dq_rules1")) {
-            return attributes.getJSONArray("dq_rules");
-        }
-
-        return new JSONArray();
-    }
-
     private JsonNode PrepareColumnWithRules(JsonNode colEntity, String qualifiedName, String ruleId, String ruleIdUUID) {
         JSONArray dqRules = getDQRulesJSONArray(colEntity.getObject().getJSONObject("entity").getJSONObject("attributes"));
 
@@ -126,28 +118,30 @@ public class UpsertDQRulesFunction {
         dqRule.put("typeName", "dq_rule");
         dqRule.put("uniqueAttributes", dqRuleAttributes);
 
-        if (dqRules == null || dqRules.isEmpty()) {
-            dqRules = new JSONArray();
-            dqRules.put(dqRule);
+        boolean dqRuleExits = false;
+        for (Object obj : dqRules) {
+            //dq_rules with guid exists
+            if (((JSONObject) obj).getString("guid").equalsIgnoreCase(ruleIdUUID)) {
+                dqRuleExits = true;
+                break;
+            }
         }
-        else {
-            boolean dqRuleExits = false;
-            for (Object obj : dqRules) {
-                //dq_rules with guid exists
-                if (((JSONObject) obj).getString("guid").equalsIgnoreCase(ruleIdUUID)) {
-                    dqRuleExits = true;
-                    break;
-                }
-            }
-            //dq_rules with no match
-            if (!dqRuleExits) {
-                dqRules.put(dqRule);
-            }
+        //dq_rules with no match
+        if (!dqRuleExits) {
+            dqRules.put(dqRule);
         }
 
         colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").remove("dq_rules");
         colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").put("dq_rules", dqRules);
         return colEntity;
+    }
+
+    private JSONArray getDQRulesJSONArray(JSONObject attributes) {
+        if(attributes.has("dq_rules")) {
+            return attributes.getJSONArray("dq_rules");
+        }
+
+        return new JSONArray();
     }
 
     private List<RulesInfo> queryRulesInfo(Timestamp waterMarkTimestamp) {
