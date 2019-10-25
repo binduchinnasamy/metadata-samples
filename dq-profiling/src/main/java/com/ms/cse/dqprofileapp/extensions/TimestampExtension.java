@@ -11,7 +11,7 @@ public class TimestampExtension {
         String minDateAsISO8601 = "1970-01-01T00:00:00.000000Z";
         DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
         TemporalAccessor accessor = timeFormatter.parse(minDateAsISO8601);
-        Timestamp minTimestamp = Timestamp.from(Instant.from(accessor));
+        Timestamp minTimestamp = fromInstant(Instant.from(accessor));
         return minTimestamp;
     }
 
