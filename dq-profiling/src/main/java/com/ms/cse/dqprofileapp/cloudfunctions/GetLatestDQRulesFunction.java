@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.function.Function;
 
-import com.ms.cse.dqprofileapp.extensions.TimestampExtension;
 import com.ms.cse.dqprofileapp.models.*;
 import kong.unirest.JsonNode;
 import kong.unirest.json.JSONArray;
@@ -93,7 +92,7 @@ public class GetLatestDQRulesFunction {
                             JsonNode colEntity = atlasWrapperClient.getEntity(entityId);
 
                             colEntity = PrepareColumnWithRules(colEntity, qualifiedNameResponse.getQualifiedName(), ruleInfo.getRuleId(), ruleIdUUID.toString());
-                            atlasWrapperClient.createEntity(colEntity);
+                            atlasWrapperClient.upsertEntity(colEntity);
                         }
                     }
                 }

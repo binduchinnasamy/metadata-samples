@@ -48,7 +48,7 @@ public class GetCurrentColumnScoresFunction {
                             JsonNode colEntity = atlasWrapperClient.getEntity(entityId);
 
                             colEntity = PrepareColumnWithUpdatedAttributes(colEntity, columnScore);
-                            atlasWrapperClient.createEntity(colEntity);
+                            atlasWrapperClient.upsertEntity(colEntity);
                         }
                     }
                 }

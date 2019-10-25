@@ -25,7 +25,7 @@ public class AtlasWrapperHttpClient{
         return single_instance;
     }
 
-    public void createEntity(JsonNode entity){
+    public void upsertEntity(JsonNode entity){
         String entityBulkUrl = this.baseUrl + "entity";
         HttpResponse<JsonNode> response =
                 Unirest.post(entityBulkUrl)
