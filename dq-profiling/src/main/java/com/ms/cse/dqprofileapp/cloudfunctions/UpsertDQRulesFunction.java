@@ -106,9 +106,16 @@ public class UpsertDQRulesFunction {
         };
     }
 
+    private JSONArray getDQRulesJSONArray(JSONObject attributes) {
+        if(attributes.has("dq_rules1")) {
+            return attributes.getJSONArray("dq_rules");
+        }
+
+        return new JSONArray();
+    }
+
     private JsonNode PrepareColumnWithRules(JsonNode colEntity, String qualifiedName, String ruleId, String ruleIdUUID) {
-        //entity.attriburtes.dq_rules[] null or empty
-        JSONArray dqRules = colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").getJSONArray("dq_rules");
+        JSONArray dqRules = getDQRulesJSONArray(colEntity.getObject().getJSONObject("entity").getJSONObject("attributes"));
 
         JSONObject dqRuleAttributes = new JSONObject();
         dqRuleAttributes.put("qualifiedName", qualifiedName);
