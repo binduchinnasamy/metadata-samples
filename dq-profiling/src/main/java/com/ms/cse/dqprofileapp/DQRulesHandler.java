@@ -13,10 +13,10 @@ import org.springframework.context.annotation.ComponentScan;
 import java.util.List;
 
 @ComponentScan(basePackages={"com.ms.cse.dqprofileapp"})
-public class DQRulesHandler extends AzureSpringBootRequestHandler<FunctionInput, List<RulesInfo>> {
+public class DQRulesHandler extends AzureSpringBootRequestHandler<FunctionInput, Integer> {
 
     @FunctionName("getLatestDQRules")
-    public List<RulesInfo> execute(
+    public Integer execute(
             @TimerTrigger(name = "getLatestDQRulesTrigger", schedule = "0 */2 * * * *") String timerInfo,
             ExecutionContext context) {
 
@@ -24,8 +24,6 @@ public class DQRulesHandler extends AzureSpringBootRequestHandler<FunctionInput,
         FunctionInput input = new FunctionInput();
         input.setTimeStamp(scheduleStatus.getLast() == null ? TimestampExtension.now() : scheduleStatus.getLast());
         input.setExecutionContext(context);
-        List<RulesInfo> rulesInfos = handleRequest(input, context);
-        
-        return rulesInfos;
+        return handleRequest(input, context);
     }
 }

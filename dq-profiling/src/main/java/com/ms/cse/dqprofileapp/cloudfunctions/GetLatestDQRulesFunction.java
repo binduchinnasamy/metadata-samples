@@ -38,7 +38,7 @@ public class GetLatestDQRulesFunction {
     private RulesInfoRepository rulesInfoRepository;
 
     @Bean
-    public Function<FunctionInput, List<RulesInfo>> getLatestDQRules() {
+    public Function<FunctionInput, Integer> getLatestDQRules() {
         return input -> {
             Logger logger = input.getExecutionContext().getLogger();
 
@@ -95,10 +95,11 @@ public class GetLatestDQRulesFunction {
                 }
             } catch (Exception e)
             {
-                System.out.println("E:" + e.toString());
+                logger.info("exception: " + e.toString());
+                System.out.println("exception:" + e.toString());
             }
 
-            return rulesInfo;
+            return 0;
         };
     }
 

@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 import com.google.gson.JsonObject;
 import com.ms.cse.dqprofileapp.models.QualifiedNameServiceResponse;
 import kong.unirest.HttpResponse;
-import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
 
 public class QnsHttpClient {
@@ -50,6 +49,6 @@ public class QnsHttpClient {
         logger.info(qnsResponse.toString());
         System.out.println("getQualifiedName.qnsResponse: " + qnsResponse.toString());
 
-        return response.getBody();
+        return qnsResponse;
     }
 }
