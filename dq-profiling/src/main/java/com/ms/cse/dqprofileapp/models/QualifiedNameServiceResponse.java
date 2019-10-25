@@ -28,7 +28,7 @@ public class QualifiedNameServiceResponse {
 
     @Override
     public String toString() {
-        return "isExists: " + this.isExists + "qualifiedName: " + this.qualifiedName + "guid: " + this.guid + "error_code: " + error_code + "error_description: " + this.error_description;
+        return "{ \"isExists\": \"" + this.isExists + "\", \"qualifiedName\": \"" + this.qualifiedName + "\", \"guid\": \"" + this.guid + "\", \"error_code\": \"" + error_code + "\", \"error_description\": \"" + this.error_description + "\" }";
     }
 
 }
