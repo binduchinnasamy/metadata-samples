@@ -11,9 +11,9 @@ import org.springframework.context.annotation.ComponentScan;
 
 @ComponentScan(basePackages={"com.ms.cse.dqprofileapp"})
 public class ColumnScoreHandler extends AzureSpringBootRequestHandler<FunctionInput, Integer> {
-    @FunctionName("getCurrentColumnScores")
+    @FunctionName("updateColumnScores")
     public Integer execute(
-            @TimerTrigger(name = "getCurrentColumnScoresTrigger", schedule = "0 */2 * * * *") String timerInfo,
+            @TimerTrigger(name = "updateColumnScoresTrigger", schedule = "0 */2 * * * *") String timerInfo,
             ExecutionContext context) {
         ScheduleStatus scheduleStatus = ScheduleStatus.Deserialize(timerInfo);
         FunctionInput input = new FunctionInput();

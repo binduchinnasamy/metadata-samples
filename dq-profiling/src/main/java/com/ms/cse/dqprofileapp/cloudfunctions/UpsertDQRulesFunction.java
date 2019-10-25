@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GetLatestDQRulesFunction {
+public class UpsertDQRulesFunction {
 
     @Value("${dqProfileApp.qns-svc.baseUrl}")
     private String qnsSvcUrl;
@@ -38,7 +38,7 @@ public class GetLatestDQRulesFunction {
     private RulesInfoRepository rulesInfoRepository;
 
     @Bean
-    public Function<FunctionInput, Integer> getLatestDQRules() {
+    public Function<FunctionInput, Integer> upsertDQRules() {
         return input -> {
             Logger logger = input.getExecutionContext().getLogger();
 

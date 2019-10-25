@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @Component
-public class GetCurrentColumnScoresFunction {
+public class UpdateColumnScoresFunction {
     @Autowired
     private ColumnScoreRepository columnScoreRepository;
 
@@ -23,7 +23,7 @@ public class GetCurrentColumnScoresFunction {
     private String atlasWrapperSvcUrl;
 
     @Bean
-    public Function<FunctionInput, Integer> getCurrentColumnScores() {
+    public Function<FunctionInput, Integer> updateColumnScores() {
         return input -> {
             // TODO: remove this before final checkin
             List<ColumnScore> columnScores = (List) columnScoreRepository.findAll();
