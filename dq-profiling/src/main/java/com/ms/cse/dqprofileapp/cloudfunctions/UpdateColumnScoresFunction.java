@@ -1,6 +1,7 @@
 package com.ms.cse.dqprofileapp.cloudfunctions;
 
 import com.ms.cse.dqprofileapp.clients.AtlasWrapperHttpClient;
+import com.ms.cse.dqprofileapp.extensions.TimestampExtension;
 import com.ms.cse.dqprofileapp.models.ColumnScore;
 import com.ms.cse.dqprofileapp.models.FunctionInput;
 import com.ms.cse.dqprofileapp.repositories.ColumnScoreRepository;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.function.Function;
 
@@ -22,14 +24,13 @@ public class UpdateColumnScoresFunction {
     @Value("${dqProfileApp.atlaswrapper-svc.baseUrl}")
     private String atlasWrapperSvcUrl;
 
+    @Value("${dqProfileApp.updateColumnScores.queryAll}")
+    private boolean queryAll;
+
     @Bean
     public Function<FunctionInput, Integer> updateColumnScores() {
         return input -> {
-            // TODO: remove this before final checkin
-            List<ColumnScore> columnScores = (List) columnScoreRepository.findAll();
-
-            //TODO: Uncomment this before final checkin
-//            List<ColumnScore> columnScores = columnScoreRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(input.getTimeStamp(), TimestampExtension.now());
+            List<ColumnScore> columnScores = queryColumnScore(input.getTimeStamp());
             try {
                 //call atlas to find the column entity
                 AtlasWrapperHttpClient atlasWrapperClient = AtlasWrapperHttpClient.getInstance(this.atlasWrapperSvcUrl, input.getExecutionContext().getLogger());
@@ -74,4 +75,11 @@ public class UpdateColumnScoresFunction {
         return colEntity;
     }
 
+    private List<ColumnScore> queryColumnScore(Timestamp waterMarkTimestamp){
+        if(queryAll) {
+            return  (List)columnScoreRepository.findAll();
+        }
+
+        return columnScoreRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(waterMarkTimestamp, TimestampExtension.now());
+    }
 }

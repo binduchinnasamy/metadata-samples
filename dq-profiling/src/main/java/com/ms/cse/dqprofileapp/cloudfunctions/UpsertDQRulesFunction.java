@@ -1,9 +1,11 @@
 package com.ms.cse.dqprofileapp.cloudfunctions;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.function.Function;
 
+import com.ms.cse.dqprofileapp.extensions.TimestampExtension;
 import com.ms.cse.dqprofileapp.models.*;
 import kong.unirest.JsonNode;
 import kong.unirest.json.JSONArray;
@@ -34,6 +36,9 @@ public class UpsertDQRulesFunction {
     @Value("${dqProfileApp.atlaswrapper-svc.baseUrl}")
     private String atlasWrapperSvcUrl;
 
+    @Value("${dqProfileApp.upsertDQRules.queryAll}")
+    private boolean queryAll;
+
     @Autowired
     private RulesInfoRepository rulesInfoRepository;
 
@@ -46,8 +51,7 @@ public class UpsertDQRulesFunction {
             JsonCreatorHttpClient jsonCreatorClient = JsonCreatorHttpClient.getInstance(this.jsonCreatorSvcUrl, this.jsonCreatorSvcCode, logger);
             AtlasWrapperHttpClient atlasWrapperClient = AtlasWrapperHttpClient.getInstance(this.atlasWrapperSvcUrl, logger);
 
-            //List<RulesInfo> rulesInfo = rulesInfoRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(input.getTimeStamp(), TimestampExtension.now());
-            List<RulesInfo> rulesInfo = (List<RulesInfo>) rulesInfoRepository.findAll();
+            List<RulesInfo> rulesInfo = queryRulesInfo(input.getTimeStamp());
             List<JsonWrapperEntity> entities = new ArrayList<JsonWrapperEntity>();
 
             try {
@@ -137,5 +141,13 @@ public class UpsertDQRulesFunction {
         colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").remove("dq_rules");
         colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").put("dq_rules", dqRules);
         return colEntity;
+    }
+
+    private List<RulesInfo> queryRulesInfo(Timestamp waterMarkTimestamp) {
+        if(queryAll) {
+            return (List<RulesInfo>) rulesInfoRepository.findAll();
+        }
+
+        return rulesInfoRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(waterMarkTimestamp, TimestampExtension.now());
     }
 }

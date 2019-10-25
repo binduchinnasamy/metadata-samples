@@ -11,7 +11,11 @@ dqProfileApp:
     code: ""
   atlaswrapper-svc:
     baseUrl: ""
-    code: ""     
+    code: ""
+  updateColumnScores:
+    queryAll: true # dictates if all the entries of the view will be queried or just the ones in the time range
+  upsertDQRules:
+    queryAll: true # dictates if all the entries of the table will be queried or just the ones in the time range
 spring:
   jmx:
     default-domain: com.ms.cse
