@@ -54,7 +54,6 @@ public class UpdateColumnScoresFunction {
                 }
             } catch (Exception e){
                 input.getExecutionContext().getLogger().info(e.toString());
-                System.out.println(e);
             }
             return 0;
         };

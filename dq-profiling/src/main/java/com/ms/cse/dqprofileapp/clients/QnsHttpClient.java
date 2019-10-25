@@ -47,7 +47,6 @@ public class QnsHttpClient {
         QualifiedNameServiceResponse qnsResponse = response.getBody();
 
         logger.info(qnsResponse.toString());
-        System.out.println("getQualifiedName.qnsResponse: " + qnsResponse.toString());
 
         return qnsResponse;
     }

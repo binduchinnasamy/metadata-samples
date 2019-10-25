@@ -39,8 +39,7 @@ public class JsonCreatorHttpClient{
                     .asJson();
         
         logger.info(response.getBody().toPrettyString());       
-        System.out.println(response.getBody().toPrettyString());
-        
+
         return response.getBody();
     }
 }

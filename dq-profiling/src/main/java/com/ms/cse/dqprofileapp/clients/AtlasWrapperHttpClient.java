@@ -33,7 +33,6 @@ public class AtlasWrapperHttpClient{
                         .body(entity)
                         .asJson();
 
-        System.out.println("createEntity.responseBody: " + response.getBody().toPrettyString());
         logger.info("createEntity.responseBody: " + response.getBody().toPrettyString());
     }
 
@@ -41,7 +40,6 @@ public class AtlasWrapperHttpClient{
         String searchUrl = this.baseUrl + "entity/guid/" + entityGuid;
         HttpResponse<JsonNode> response = Unirest.get(searchUrl).asJson();
 
-        System.out.println("getEntity: " + response.getBody().toPrettyString());
         logger.info("getEntity: " + response.getBody().toPrettyString());
 
         return response.getBody();
@@ -54,7 +52,6 @@ public class AtlasWrapperHttpClient{
                         .queryString("query", criteria)
                         .asJson();
 
-        System.out.println("search: " + response.getBody().toPrettyString());
         logger.info("search: " + response.getBody().toPrettyString());
 
         return response.getBody();
@@ -68,7 +65,6 @@ public class AtlasWrapperHttpClient{
                         .body(requestBody)
                         .asJson();
 
-        System.out.println("createBulk.mutatedEntities: " + response.getBody().toPrettyString());
         logger.info("createBulk.mutatedEntities: " + response.getBody().toPrettyString());
 
         return response.getBody();

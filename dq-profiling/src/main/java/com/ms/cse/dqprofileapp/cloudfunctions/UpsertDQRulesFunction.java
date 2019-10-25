@@ -56,20 +56,17 @@ public class UpsertDQRulesFunction {
                     entities.clear();
                     String columnFqdn = ruleInfo.getColumnFQDN();
                     QualifiedNameServiceResponse qualifiedNameResponse = qnsClient.getQualifiedName(columnFqdn, ruleInfo.getRuleId());
-                    System.out.println("qualifiedNameResponse:" + qualifiedNameResponse.toString());
+
                     UUID ruleIdUUID;
                     if (!qualifiedNameResponse.isExists()) { //rule doesn't exist, so go create it
                         JsonWrapperEntity entity = JsonWrapperEntity.create(ruleInfo, qualifiedNameResponse.getQualifiedName());
                         entities.add(entity);
 
                         JsonNode jsonWrapperEntities = jsonCreatorClient.getJson(JsonWrapperEntity.from(entities));
-                        System.out.println("jsonWrapperEntities:" + jsonWrapperEntities.toPrettyString());
 
                         //take output json and call atlaswrapper create bulk entity
                         JsonNode mutatedEntities = atlasWrapperClient.createBulk(jsonWrapperEntities);
                         String uuid = mutatedEntities.getObject().getJSONObject("mutatedEntities").getJSONArray("CREATE").getJSONObject(0).getString("guid");
-
-                        System.out.println("uuid: " + uuid);
                         ruleIdUUID = UUID.fromString(uuid);
                     } else { //rule already existed
                         ruleIdUUID = qualifiedNameResponse.getGuid();
@@ -99,7 +96,6 @@ public class UpsertDQRulesFunction {
             } catch (Exception e)
             {
                 logger.info("exception: " + e.toString());
-                System.out.println("exception:" + e.toString());
             }
 
             return 0;
