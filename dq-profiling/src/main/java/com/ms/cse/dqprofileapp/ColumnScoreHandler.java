@@ -13,7 +13,7 @@ import org.springframework.context.annotation.ComponentScan;
 public class ColumnScoreHandler extends AzureSpringBootRequestHandler<FunctionInput, Integer> {
     @FunctionName("updateColumnScores")
     public Integer execute(
-            @TimerTrigger(name = "updateColumnScoresTrigger", schedule = "0 */2 * * * *") String timerInfo,
+            @TimerTrigger(name = "updateColumnScoresTrigger", schedule = "0 */30 * * * *") String timerInfo,
             ExecutionContext context) {
         ScheduleStatus scheduleStatus = ScheduleStatus.Deserialize(timerInfo);
         FunctionInput input = new FunctionInput();

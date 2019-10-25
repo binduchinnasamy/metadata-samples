@@ -14,7 +14,7 @@ public class DQRulesHandler extends AzureSpringBootRequestHandler<FunctionInput,
 
     @FunctionName("upsertDQRules")
     public Integer execute(
-            @TimerTrigger(name = "upsertDQRulesTrigger", schedule = "0 */2 * * * *") String timerInfo,
+            @TimerTrigger(name = "upsertDQRulesTrigger", schedule = "0 */30 * * * *") String timerInfo,
             ExecutionContext context) {
 
         ScheduleStatus scheduleStatus = ScheduleStatus.Deserialize(timerInfo);
