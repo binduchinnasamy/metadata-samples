@@ -51,6 +51,12 @@ def main(blob: func.InputStream):
             if 'guid' in filesystem_json_qns:
                 guids['azure_datalake_gen2_filesystem']=filesystem_json_qns["guid"]
             
+            # Set the correct GUIDs for the parents
+            storageac_json_qns['entity']['guid']=guids['azure_storage_account']
+            service_json_qns['entity']['guid']=guids['azure_datalake_gen2_service']
+            filesystem_json_qns['entity']['guid']=guids['azure_datalake_gen2_filesystem']
+
+            # Add link objects
             # Add Resource Set -1            
             for entity in resource_set_json_qns['entity']:
                 resourceset_link_object={
@@ -147,6 +153,7 @@ def process_entity(entity,adls_gen2_uri,file_system,qns_service_url, entity_type
         guid=""        
         if response_json['isExists']==False:
             entity['attributes'][0]['attr_value'] =response_json['qualifiedName']
+            return {'entity':entity}
         elif response_json['isExists']==True:
             entity['attributes'][0]['attr_value'] =response_json['qualifiedName']
             guid_object ={
@@ -154,7 +161,7 @@ def process_entity(entity,adls_gen2_uri,file_system,qns_service_url, entity_type
             }            
             entity['guid']=response_json['guid']
             guid=response_json['guid']       
-        return {'entity':entity,'guid':guid}
+            return {'entity':entity,'guid':guid}
     else:
         return None 
 def getQualifiedName(adls_gen2_uri, file_system, entity_path, qns_service_url,entity_type):

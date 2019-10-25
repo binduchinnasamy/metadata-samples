@@ -19,7 +19,7 @@ from datetime import datetime
 KeyVault_Scope = os.environ['Azure_KeyVault_Scope']
 KeyVault_ADLSGen2_Access_Secret_Name = os.environ['KeyVault_ADLSGen2_Access_Secret_Name']
 ADLSGen2_URL = os.environ['ADLSGen2_URL']
-ADLSGen2_FileSystem = os.environ['ADLSGen2_FileSystem']
+#ADLSGen2_FileSystem = os.environ['ADLSGen2_FileSystem']
 KeyVault_BlobStorage_Access_Secret_Name = os.environ['KeyVault_BlobStorage_Access_Secret_Name']
 BlobStorage_URL = os.environ['BlobStorage_URL']
 BlobStorage_Output_Container = os.environ['BlobStorage_Output']
@@ -62,8 +62,8 @@ spark.conf.set(
 # COMMAND ----------
 
 def uploadtoBlob(content, file_name):
-  try:
-    timenow = datetime.now()
+  try:    
+    timenow = datetime.now()   
     file_name = file_name+str(timenow.strftime("-%m%d%Y-%H-%M-%S"))+".json"
     result = dbutils.fs.put("wasbs://"+BlobStorage_Output_Container+"@"+BlobStorage_URL+"/"+file_name,content,True)
     if result == True:
@@ -88,40 +88,49 @@ def makeoutputjson_storageaccount(name,subscriptionId,resourceGroupName,location
     "created_by":"harvester",
      "attributes":[
          {
-             "attr_name":"qualifiedname",
-             "attr_value":""
+             "attr_name":"qualifiedName",
+             "attr_value":"",
+             "is_entityref": False
          },
          {
             "attr_name":"name",
-            "attr_value":name
+            "attr_value":name,
+            "is_entityref": False
         },
         {
             "attr_name":"subscriptionId",
-            "attr_value":subscriptionId
+            "attr_value":subscriptionId,
+            "is_entityref": False
         }, 
         {
             "attr_name":"resourceGroupName",
-            "attr_value":resourceGroupName
+            "attr_value":resourceGroupName,
+            "is_entityref": False
         },
         {
             "attr_name":"location",
-            "attr_value":location
+            "attr_value":location,
+            "is_entityref": False
         },
         {
             "attr_name":"createTime",
-            "attr_value":createTime
+            "attr_value":createTime,
+            "is_entityref": False
         },
         {
             "attr_name":"accessTier",
-            "attr_value":"Unknown"
+            "attr_value":"Unknown",
+            "is_entityref": False
         },
         {
             "attr_name":"SKU",
-            "attr_value":SKU
+            "attr_value":SKU,
+            "is_entityref": False
         },
         {
             "attr_name":"kind",
-            "attr_value":"StorageV2"
+            "attr_value":"StorageV2",
+            "is_entityref": False
         }
      ]
   }
@@ -152,9 +161,33 @@ def makeoutputjson_filesystem(name):
 
 # COMMAND ----------
 
+def makeoutputjson_service(name):
+  entity_json ={
+      "entity_type_name": "azure_datalake_gen2_service",
+      "created_by": "harvester",
+      "attributes": [{
+          "attr_name": "qualifiedName",
+          "attr_value": "",
+          "is_entityref": False
+       }, 
+        {
+          "attr_name": "name",
+          "attr_value": name,
+          "is_entityref": False
+      }
+      ]
+    }
+  json_string= json.dumps(entity_json)
+  return json_string
+  
+
+# COMMAND ----------
+
 def makeoutputjson(entitylist):
   entity_final=[]
   for entity in entitylist:
+    if entity.endswith('/'):
+      entity=entity[0:len(entity)-1]      
     entity_json ={
       "entity_type_name": "azure_datalake_gen2_resource_set",
       "created_by": "harvester",
@@ -231,17 +264,24 @@ storage_client = StorageManagementClient(credentials, subscription_id)
 storage_account = storage_client.storage_accounts.get_properties(resource_group_name, storage_account_name)
 # Get properties of storage account
 # Get properties of storage account
+#createdtime=storage_account.creation_time
+#sa_creation_time=storage_account.creation_time.timestamp()
+#print(sa_creation_time)
+###
 sa_creation_time=storage_account.creation_time.strftime("%Y-%m-%d %H:%M:%S")
+sa_creation_time_test=str(storage_account.creation_time.timestamp())
+print("sa creation time "+ sa_creation_time_test)
 sa_kind=storage_account.kind
 sa_location=storage_account.location
 sa_name=storage_account.name
 sa_sku=storage_account.sku.name
-print(sa_sku)
+#print(sa_sku)
 # Go further only for Storage Gen 2
 if sa_kind =='StorageV2':
   # make output json for storage account
-  output_json_sa = makeoutputjson_storageaccount(sa_name,subscription_id,resource_group_name,sa_location,sa_creation_time,sa_sku)
-  print(output_json_sa)
+  output_json_sa = makeoutputjson_storageaccount(sa_name,subscription_id,resource_group_name,sa_location,sa_creation_time_test,sa_sku)
+  output_json_service=makeoutputjson_service(sa_name)
+  #print(output_json_sa)
   #Get Storage Account file system properties
   storage_keys = storage_client.storage_accounts.list_keys(resource_group_name, storage_account_name)
   storage_keys = {v.key_name: v.value for v in storage_keys.keys}
@@ -261,9 +301,10 @@ if sa_kind =='StorageV2':
       output_json= makeoutputjson(entitylist)
       output_json_filesystem={
         "azure_storage_account":json.loads(output_json_sa),
+        "azure_datalake_gen2_service":json.loads(output_json_service),
         "azure_datalake_gen2_filesystem":json.loads(output_json_fs),
         "azure_datalake_gen2_resource_set":json.loads(output_json)
       }
       json_string_final= json.dumps(output_json_filesystem)
       output_filename=filesystem+"@"+ADLSGen2_URL
-      uploadtoBlob(json_string_final,output_filename)
+      uploadtoBlob(json_string_final,output_filename) 
