@@ -8,7 +8,7 @@ import java.time.temporal.TemporalAccessor;
 public class TimestampExtension {
 
     public static Timestamp minTimestamp() {
-        String minDateAsISO8601 = "1970-01-01T00:00:00.000000+05:30";
+        String minDateAsISO8601 = "1970-01-01T00:00:00.000000Z";
         DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_DATE_TIME;
         TemporalAccessor accessor = timeFormatter.parse(minDateAsISO8601);
         Timestamp minTimestamp = Timestamp.from(Instant.from(accessor));
