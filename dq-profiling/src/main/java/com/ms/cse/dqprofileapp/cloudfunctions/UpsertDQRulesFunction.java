@@ -51,7 +51,9 @@ public class UpsertDQRulesFunction {
             JsonCreatorHttpClient jsonCreatorClient = JsonCreatorHttpClient.getInstance(this.jsonCreatorSvcUrl, this.jsonCreatorSvcCode, logger);
             AtlasWrapperHttpClient atlasWrapperClient = AtlasWrapperHttpClient.getInstance(this.atlasWrapperSvcUrl, logger);
 
-            List<RulesInfo> rulesInfo = queryRulesInfo(input.getTimeStamp());
+            List<RulesInfo> rulesInfo = queryAll ?
+                    (List<RulesInfo>) rulesInfoRepository.findAll() :
+                    rulesInfoRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(input.getTimeStamp(), TimestampExtension.now());
             List<JsonWrapperEntity> entities = new ArrayList<JsonWrapperEntity>();
 
             try {
@@ -107,7 +109,10 @@ public class UpsertDQRulesFunction {
     }
 
     private JsonNode PrepareColumnWithRules(JsonNode colEntity, String qualifiedName, String ruleId, String ruleIdUUID) {
-        JSONArray dqRules = getDQRulesJSONArray(colEntity.getObject().getJSONObject("entity").getJSONObject("attributes"));
+        JSONObject attributes = colEntity.getObject().getJSONObject("entity").getJSONObject("attributes");
+        JSONArray dqRules = attributes.has("dq_rules") ?
+                attributes.getJSONArray("dq_rules") :
+                new JSONArray();
 
         JSONObject dqRuleAttributes = new JSONObject();
         dqRuleAttributes.put("qualifiedName", qualifiedName);
@@ -134,21 +139,5 @@ public class UpsertDQRulesFunction {
         colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").remove("dq_rules");
         colEntity.getObject().getJSONObject("entity").getJSONObject("attributes").put("dq_rules", dqRules);
         return colEntity;
-    }
-
-    private JSONArray getDQRulesJSONArray(JSONObject attributes) {
-        if(attributes.has("dq_rules")) {
-            return attributes.getJSONArray("dq_rules");
-        }
-
-        return new JSONArray();
-    }
-
-    private List<RulesInfo> queryRulesInfo(Timestamp waterMarkTimestamp) {
-        if(queryAll) {
-            return (List<RulesInfo>) rulesInfoRepository.findAll();
-        }
-
-        return rulesInfoRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(waterMarkTimestamp, TimestampExtension.now());
     }
 }

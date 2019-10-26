@@ -30,7 +30,9 @@ public class UpdateColumnScoresFunction {
     @Bean
     public Function<FunctionInput, Integer> updateColumnScores() {
         return input -> {
-            List<ColumnScore> columnScores = queryColumnScore(input.getTimeStamp());
+            List<ColumnScore> columnScores = queryAll ?
+                    (List)columnScoreRepository.findAll() :
+                    columnScoreRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(input.getTimeStamp(), TimestampExtension.now());
             try {
                 //call atlas to find the column entity
                 AtlasWrapperHttpClient atlasWrapperClient = AtlasWrapperHttpClient.getInstance(this.atlasWrapperSvcUrl, input.getExecutionContext().getLogger());
@@ -73,13 +75,5 @@ public class UpdateColumnScoresFunction {
         colEntity.getObject().getJSONObject("entity").remove("attributes");
         colEntity.getObject().getJSONObject("entity").put("attributes", attributes);
         return colEntity;
-    }
-
-    private List<ColumnScore> queryColumnScore(Timestamp waterMarkTimestamp){
-        if(queryAll) {
-            return  (List)columnScoreRepository.findAll();
-        }
-
-        return columnScoreRepository.findByUpdateTimestampBetweenOrderByUpdateTimestampDesc(waterMarkTimestamp, TimestampExtension.now());
     }
 }
