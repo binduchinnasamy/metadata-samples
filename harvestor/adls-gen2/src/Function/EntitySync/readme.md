@@ -4,7 +4,8 @@
 2. api_access_layer_url - URL of API Access layer
 3. qns_url - URL of QNS Service
 4. trigger_STORAGE - Blob storage connection string
-5. AzureWebJobsStorage - Storage account connection string for Azure function to use internally 
+5. AzureWebJobsStorage - Storage account connection string for Azure function to use internally
+6. "FUNCTIONS_WORKER_RUNTIME": "python", 
 
 #### function.json parameters
 Ensure the following varialbes in function.json correctly set 

@@ -105,9 +105,9 @@ def main(blob: func.InputStream):
                 if api_output.status_code ==200:
                     logging.info("File processed successfully!")
                 else:
-                    logging.error("Error in calling meta access layer with error code:"+api_output.status_code + " "+api_output.text)
+                    logging.error("Error in calling meta access layer with error code:"+str(api_output.status_code) + " "+api_output.text)
             else:
-                logging.error("Error while calling JSON generator service with error code:"+return_json.status_code+" "+return_json.text)
+                logging.error("Error while calling JSON generator service with error code:"+str(return_json.status_code)+" "+return_json.text)
         else:
             logging.error("input request json is empty")   
 
