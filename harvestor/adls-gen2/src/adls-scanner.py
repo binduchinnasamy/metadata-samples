@@ -11,24 +11,24 @@ from datetime import datetime
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Get all the variables from cluster's environment variables. The variables should be pushed to the cluster via DevOps pipline in a ideal scenario
+# MAGIC Get all the variables from cluster's environment variables. These variables can be pushed to cluster's environment variable either manually or via DevOps pipleline while provisioning the cluster 
 
 # COMMAND ----------
 
 # Get Environment varaibles
-KeyVault_Scope = os.environ['Azure_KeyVault_Scope']
-KeyVault_ADLSGen2_Access_Secret_Name = os.environ['KeyVault_ADLSGen2_Access_Secret_Name']
-ADLSGen2_URL = os.environ['ADLSGen2_URL']
+KeyVault_Scope = os.environ['KEYVAULT_SCOPE']
+KeyVault_ADLSGen2_Access_Secret_Name = os.environ['KEYVAULT_ADLSGEN2_ACCESS_SECRET_NAME']
+ADLSGen2_URL = os.environ['ADLSGEN2_URL']
 #ADLSGen2_FileSystem = os.environ['ADLSGen2_FileSystem']
-KeyVault_BlobStorage_Access_Secret_Name = os.environ['KeyVault_BlobStorage_Access_Secret_Name']
-BlobStorage_URL = os.environ['BlobStorage_URL']
-BlobStorage_Output_Container = os.environ['BlobStorage_Output']
-Scan_Depth=os.environ['Scan_Depth']
-AAD_Client_Id=os.environ['AAD_Client_Id']
-KeyVault_Client_Secret_Secret_Name=os.environ['KeyVault_Client_Secret_Secret_Name']
-ADLSGen2_Resource_Group=os.environ['ADLSGen2_Resource_Group']
-ADLSGen2_Subscription_Id=os.environ['ADLSGen2_Subscription_Id']
-AAD_Tenant_Id=os.environ['AAD_Tenant_Id']
+KeyVault_BlobStorage_Access_Secret_Name = os.environ['KEYVAULT_BLOBSTORAGE_ACCESS_SECRET_NAME']
+BlobStorage_URL = os.environ['BLOBSTORAGE_URL']
+BlobStorage_Output_Container = os.environ['BLOBSTORAGE_OUTPUT_CONTAINER']
+Scan_Depth=os.environ['SCAN_DEPTH']
+AAD_Client_Id=os.environ['AAD_CLIENT_ID']
+KeyVault_Client_Secret_Secret_Name=os.environ['KEYVAULT_CLIENT_SECRET_SECRET_NAME']
+ADLSGen2_Resource_Group=os.environ['ADLSGEN2_RESOURCE_GROUP']
+ADLSGen2_Subscription_Id=os.environ['ADLSGEN2_SUBSCRIPTION_ID']
+AAD_Tenant_Id=os.environ['AAD_TENANT_ID']
 
 # COMMAND ----------
 
@@ -48,7 +48,6 @@ spark.conf.set(
 
 # COMMAND ----------
 
-# Set spark configuration for output Blob Storage Account
 spark.conf.set(
   "fs.azure.account.key."+BlobStorage_URL,
  dbutils.secrets.get(scope = KeyVault_Scope, key = KeyVault_BlobStorage_Access_Secret_Name))
@@ -61,13 +60,13 @@ spark.conf.set(
 
 # COMMAND ----------
 
-def uploadtoBlob(content, file_name):
+def upload_to_blob(content, file_name):
   try:    
     timenow = datetime.now()   
     file_name = file_name+str(timenow.strftime("-%m%d%Y-%H-%M-%S"))+".json"
     result = dbutils.fs.put("wasbs://"+BlobStorage_Output_Container+"@"+BlobStorage_URL+"/"+file_name,content,True)
     if result == True:
-      print("File creation success!")
+      print('Successfully created file: '+file_name)
     else:
       print("File creation failed")
   except Exception as e:
@@ -77,7 +76,7 @@ def uploadtoBlob(content, file_name):
 
 # MAGIC %md
 # MAGIC Method to make JSON in a needed format <br>
-# MAGIC Input - Python list <br>
+# MAGIC Input -  list <br>
 # MAGIC Output - Json String
 
 # COMMAND ----------
@@ -114,7 +113,7 @@ def makeoutputjson_storageaccount(name,subscriptionId,resourceGroupName,location
         },
         {
             "attr_name":"createTime",
-            "attr_value":createTime,
+            "attr_value":int(float(createTime)),
             "is_entityref": False
         },
         {
@@ -183,7 +182,7 @@ def makeoutputjson_service(name):
 
 # COMMAND ----------
 
-def makeoutputjson(entitylist):
+def make_output_json(entitylist):
   entity_final=[]
   for entity in entitylist:
     if entity.endswith('/'):
@@ -229,7 +228,7 @@ def getpath(path, level, entitylist, root_path ):
 # COMMAND ----------
 
  
-def scanfilesystem(filesystem_name, account_url):  
+def scan_file_system(filesystem_name, account_url):  
   entitylist=[]
   startlevel =1
   try:    
@@ -244,8 +243,8 @@ def scanfilesystem(filesystem_name, account_url):
 
 # MAGIC %md
 # MAGIC <b>Main method</b> <br>
-# MAGIC This script is using Azure serice principal to get access to the storage account properties <br>
-# MAGIC Service principal client id is stored in environment variable and secrets are pulled from Azure KeyVault <br><br>
+# MAGIC This script is using Azure service principal to get access to the storage account properties <br>
+# MAGIC Service principal client id is stored in environment variable and secrets are pulled from Azure KeyVault <br>
 # MAGIC This script doesn't mount ADLS Gen 2 file system to databricks, instead it directly access the file system
 
 # COMMAND ----------
@@ -258,30 +257,22 @@ ad_tenantid=AAD_Tenant_Id
 resource_group_name=ADLSGen2_Resource_Group
 storage_account_name=ADLSGen2_URL[0:ADLSGen2_URL.find('.')]
 #Make credential object
-credentials = ServicePrincipalCredentials(client_id=ad_client_id, secret=ad_client_secret, tenant=ad_tenantid)    
+credentials = ServicePrincipalCredentials(client_id=ad_client_id, secret=ad_client_secret, tenant=ad_tenantid)
 resource_client = ResourceManagementClient(credentials, subscription_id)
 storage_client = StorageManagementClient(credentials, subscription_id)
 storage_account = storage_client.storage_accounts.get_properties(resource_group_name, storage_account_name)
 # Get properties of storage account
-# Get properties of storage account
-#createdtime=storage_account.creation_time
-#sa_creation_time=storage_account.creation_time.timestamp()
-#print(sa_creation_time)
-###
 sa_creation_time=storage_account.creation_time.strftime("%Y-%m-%d %H:%M:%S")
 sa_creation_time_test=str(storage_account.creation_time.timestamp())
-print("sa creation time "+ sa_creation_time_test)
 sa_kind=storage_account.kind
 sa_location=storage_account.location
 sa_name=storage_account.name
 sa_sku=storage_account.sku.name
-#print(sa_sku)
 # Go further only for Storage Gen 2
 if sa_kind =='StorageV2':
   # make output json for storage account
   output_json_sa = makeoutputjson_storageaccount(sa_name,subscription_id,resource_group_name,sa_location,sa_creation_time_test,sa_sku)
   output_json_service=makeoutputjson_service(sa_name)
-  #print(output_json_sa)
   #Get Storage Account file system properties
   storage_keys = storage_client.storage_accounts.list_keys(resource_group_name, storage_account_name)
   storage_keys = {v.key_name: v.value for v in storage_keys.keys}
@@ -294,11 +285,10 @@ if sa_kind =='StorageV2':
   for filesystem in filesystems:  
     # Pull the entity
     # make output json for file system
-    output_json_fs= makeoutputjson_filesystem(filesystem)    
-    #print(output_json_fs)
-    entitylist= scanfilesystem(filesystem,ADLSGen2_URL)
+    output_json_fs= makeoutputjson_filesystem(filesystem)  
+    entitylist= scan_file_system(filesystem,ADLSGen2_URL)
     if len(entitylist) >0:
-      output_json= makeoutputjson(entitylist)
+      output_json= make_output_json(entitylist)
       output_json_filesystem={
         "azure_storage_account":json.loads(output_json_sa),
         "azure_datalake_gen2_service":json.loads(output_json_service),
@@ -307,4 +297,5 @@ if sa_kind =='StorageV2':
       }
       json_string_final= json.dumps(output_json_filesystem)
       output_filename=filesystem+"@"+ADLSGen2_URL
-      uploadtoBlob(json_string_final,output_filename) 
+      upload_to_blob(json_string_final,output_filename)
+print('Process completed')
