@@ -1,9 +1,9 @@
 #### The following environment variable must present for this function to work correctly
 
-1. json_generator_url - URL of JSON Generator service
-2. api_access_layer_url - URL of API Access layer
-3. qns_url - URL of QNS Service
-4. trigger_STORAGE - Blob storage connection string
+1. JSON_GENERATOR_URL - URL of JSON Generator service
+2. API_ACCESS_LAYER_URL - URL of API Access layer
+3. QNS_BASE_URL - URL of QNS Service
+4. TRIGER_STORAGE - Blob storage connection string
 5. AzureWebJobsStorage - Storage account connection string for Azure function to use internally
 6. "FUNCTIONS_WORKER_RUNTIME": "python", 
 

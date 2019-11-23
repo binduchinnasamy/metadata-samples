@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "env/bin/python",
+    "python.pythonPath": "c:\\Work\\wmt-source\\metadata-samples\\harvestor\\adls-gen2\\src\\Function\\EntitySync\\env\\Scripts\\python.exe",
     "azureFunctions.deploySubpath": ".",
     "azureFunctions.scmDoBuildDuringDeployment": true,
     "azureFunctions.pythonVenv": "env",
